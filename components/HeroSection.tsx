@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useI18n } from "./I18nProvider";
 
 const VILLA_PHOTO =
-  "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=1400&auto=format&fit=crop&q=80";
+  "https://plus.unsplash.com/premium_photo-1682377521753-58d1fd9fa5ce?w=1400&auto=format&fit=crop&q=80";
 
 export function HeroSection() {
   const { t, locale } = useI18n();
@@ -112,47 +112,51 @@ export function HeroSection() {
    ────────────────────────────────────────────────────────────────── */
 
 function PhotoCover() {
+  // Property photo on the LEFT half of the hero, full height. Image is
+  // shifted to focus on the villa (background-position biased left).
+  // A subtle dark overlay deepens the photo for contrast against the
+  // whitening fade toward the center.
+  const mask =
+    "linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 35%, rgba(0,0,0,0.5) 70%, rgba(0,0,0,0) 100%)";
   return (
     <div
       aria-hidden
-      className="absolute inset-y-0 end-0 w-[60%] lg:w-[55%] -z-10 hidden md:block overflow-hidden"
+      className="absolute inset-y-0 left-0 hidden md:block w-[50%]"
+      style={{
+        zIndex: 0,
+        backgroundImage: `url('${VILLA_PHOTO}')`,
+        backgroundSize: "cover",
+        backgroundPosition: "8% 50%",
+        backgroundRepeat: "no-repeat",
+        WebkitMaskImage: mask,
+        maskImage: mask,
+      }}
     >
-      {/* Brand-tinted fallback — always visible behind the image so the
-          area never appears empty even if the image is slow/blocked. */}
-      <PhotoFallback />
-
-      {/* Plain <img> for max compatibility. Eagerly loaded. */}
-      <img
-        src={VILLA_PHOTO}
-        alt=""
-        loading="eager"
-        decoding="async"
-        className="absolute inset-0 w-full h-full object-cover"
-      />
-
-      {/* Soft mask: long, gentle fade on the start edge so the photo
-          bleeds into the canvas instead of feeling like a card. */}
+      {/* Dark overlay — gives the photo more depth and richer tones,
+          especially under the highlights. */}
       <div
-        className="absolute inset-0 rtl:hidden"
+        className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(to right, var(--color-bg-canvas) 0%, rgba(250,251,250,0.7) 14%, rgba(250,251,250,0.1) 32%, rgba(250,251,250,0) 50%)",
+            "linear-gradient(135deg, rgba(13,28,28,0.34) 0%, rgba(13,28,28,0.18) 50%, rgba(13,28,28,0.05) 100%)",
         }}
       />
+      {/* Whitening fade toward the center — bleeds the photo into the
+          canvas as it approaches the right side. */}
       <div
-        className="absolute inset-0 hidden rtl:block"
+        className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(to left, var(--color-bg-canvas) 0%, rgba(250,251,250,0.7) 14%, rgba(250,251,250,0.1) 32%, rgba(250,251,250,0) 50%)",
+            "linear-gradient(to right, rgba(250,251,250,0) 0%, rgba(250,251,250,0.1) 45%, rgba(250,251,250,0.55) 80%, var(--color-bg-canvas) 100%)",
         }}
       />
-
-      {/* Bottom fade so the section blends into the next one */}
+      {/* Whitening fade toward the bottom — same dissolve effect as the
+          right edge so the photo bleeds into the canvas downward too. */}
       <div
-        className="absolute inset-x-0 bottom-0 h-28"
+        className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(to top, var(--color-bg-canvas) 0%, rgba(250,251,250,0.4) 60%, rgba(250,251,250,0) 100%)",
+            "linear-gradient(to bottom, rgba(250,251,250,0) 0%, rgba(250,251,250,0.1) 45%, rgba(250,251,250,0.55) 80%, var(--color-bg-canvas) 100%)",
         }}
       />
     </div>
@@ -211,19 +215,29 @@ function PhoneMockup() {
             <DotsIcon />
           </div>
 
-          {/* Chat scroll area — anchors content to the BOTTOM so the most
-              recent (CTA + reply) is always fully visible. Older messages
-              clip out the top if the phone shrinks. */}
+          {/* Chat — fills the phone vertically. Faithful WhatsApp
+              cosmetics: TODAY date pill at top, message bubbles with
+              corner tails, blue ✓✓ read receipts on bot replies. */}
           <div
-            className="grow overflow-hidden relative flex flex-col justify-end px-3 py-3 gap-2"
+            className="grow overflow-hidden relative flex flex-col px-3 py-2.5 gap-1.5"
             style={{
               background:
                 "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23e6f0ea'/%3E%3Cg opacity='0.06'%3E%3Cpath d='M0 50h100M50 0v100' stroke='%230d4a4a' stroke-width='1'/%3E%3C/g%3E%3C/svg%3E\")",
             }}
             dir="rtl"
           >
+            <DateChip label={t("hero.mockup.today")} />
+            <Bubble side="me" time={t("hero.mockup.greetingTime")} read>
+              {t("hero.mockup.greeting")}
+            </Bubble>
             <Bubble side="them" time={t("hero.mockup.msg1Time")}>
               {t("hero.mockup.msg1Customer")}
+            </Bubble>
+            <Bubble side="me" time={t("hero.mockup.msg2Time")} read>
+              {t("hero.mockup.msg2Bot")}
+            </Bubble>
+            <Bubble side="them" time={t("hero.mockup.msg3Time")}>
+              {t("hero.mockup.msg3Customer")}
             </Bubble>
             <ListingCard
               title={t("hero.mockup.msg4ListingTitle")}
@@ -232,10 +246,13 @@ function PhoneMockup() {
               price={t("hero.mockup.msg4ListingPrice")}
               tag={t("hero.mockup.msg4ListingTag")}
             />
+            <Bubble side="me" time={t("hero.mockup.msg5Time")} read>
+              {t("hero.mockup.msg5Bot")}
+            </Bubble>
             <Bubble side="them" time={t("hero.mockup.msg6Time")}>
               {t("hero.mockup.msg6Customer")}
             </Bubble>
-            <Bubble side="me" time={t("hero.mockup.msg7Time")}>
+            <Bubble side="me" time={t("hero.mockup.msg7Time")} read>
               {t("hero.mockup.msg7Bot")}
             </Bubble>
             <Bubble side="them" time={t("hero.mockup.msg8Time")}>
@@ -246,6 +263,9 @@ function PhoneMockup() {
               cta={t("hero.mockup.ctaButton")}
               time={t("hero.mockup.msg9Time")}
             />
+            <Bubble side="me" time={t("hero.mockup.msg11Time")} read>
+              {t("hero.mockup.msg11Bot")}
+            </Bubble>
           </div>
 
           {/* Composer */}
@@ -278,11 +298,10 @@ function PhoneMockup() {
           "z-10 w-[230px] rounded-[var(--radius-md)] " +
           "bg-[color:var(--color-bg-surface)] border border-[color:var(--color-border-subtle)] " +
           "shadow-[var(--shadow-hero)] p-4 " +
-          "mt-6 mx-auto lg:mt-0 lg:mx-0 lg:absolute lg:bottom-2"
+          "mt-6 mx-auto lg:mt-0 lg:mx-0 lg:absolute lg:bottom-2 " +
+          "bounce-in"
         }
         style={{
-          animation:
-            "oasis-rise 480ms cubic-bezier(0.2, 0.8, 0.2, 1) 800ms both",
           insetInlineEnd: "calc(100% + 8px)",
         }}
       >
@@ -337,27 +356,67 @@ function Bubble({
   children,
   side,
   time,
+  read,
 }: {
   children: React.ReactNode;
   side: "me" | "them";
   time: string;
+  read?: boolean;
 }) {
   const isMe = side === "me";
   return (
     <div className={"flex " + (isMe ? "justify-end" : "justify-start")}>
       <div
         className={
-          "max-w-[80%] px-2.5 py-1.5 text-[0.82rem] leading-snug shadow-sm relative " +
+          "max-w-[82%] px-2.5 pt-1.5 pb-1 text-[0.82rem] leading-snug shadow-sm relative " +
           (isMe
             ? "bg-[#dcf8c6] text-[#0a1414] rounded-[10px] rounded-br-[2px]"
             : "bg-white text-[#0a1414] rounded-[10px] rounded-bl-[2px]")
         }
       >
-        {children}
-        <span className="block text-[0.62rem] text-[#7a7a7a] mt-0.5 text-end font-[family-name:var(--font-mono)]">
-          {time}
-        </span>
+        <div>{children}</div>
+        <div
+          className="flex items-center justify-end gap-1 mt-0.5"
+          dir="ltr"
+        >
+          <span className="text-[0.62rem] text-[#7a7a7a] font-[family-name:var(--font-mono)]">
+            {time}
+          </span>
+          {isMe && read ? <ReadReceipt /> : null}
+        </div>
       </div>
+    </div>
+  );
+}
+
+function ReadReceipt() {
+  // WhatsApp blue double-check (✓✓) — read receipt indicator.
+  return (
+    <svg viewBox="0 0 18 12" fill="none" className="size-[14px]" aria-hidden>
+      <path
+        d="M1 6.5L4.5 10L11 2"
+        stroke="#34a4ff"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M6 6.5L9.5 10L17 2"
+        stroke="#34a4ff"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function DateChip({ label }: { label: string }) {
+  return (
+    <div className="flex justify-center my-1">
+      <span className="px-2.5 py-0.5 rounded-md bg-white/95 text-[#5a5a5a] text-[0.62rem] font-semibold uppercase tracking-[0.06em] shadow-sm font-[family-name:var(--font-display)]">
+        {label}
+      </span>
     </div>
   );
 }
@@ -537,28 +596,6 @@ function Leaves() {
         />
       </svg>
     </>
-  );
-}
-
-function PhotoFallback() {
-  return (
-    <div
-      className="absolute inset-0"
-      style={{
-        background:
-          "linear-gradient(135deg, var(--color-mint-200) 0%, var(--color-teal-200) 60%, var(--color-teal-400) 100%)",
-      }}
-    >
-      <svg
-        viewBox="0 0 200 160"
-        className="w-full h-full opacity-30"
-        preserveAspectRatio="xMidYMid slice"
-        aria-hidden
-      >
-        <path d="M30,140 L30,80 L100,30 L170,80 L170,140 Z" fill="white" opacity="0.8" />
-        <rect x="80" y="100" width="40" height="40" fill="var(--color-teal-700)" />
-      </svg>
-    </div>
   );
 }
 
