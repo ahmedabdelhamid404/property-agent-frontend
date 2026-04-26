@@ -1,10 +1,11 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Button } from "@/components/Button";
@@ -29,6 +30,7 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export default function SignupPage() {
+  const router = useRouter();
   const [result, setResult] = useState<SignupResponse | null>(null);
   const {
     register,
@@ -38,6 +40,12 @@ export default function SignupPage() {
     resolver: zodResolver(schema),
     defaultValues: { notificationChannel: "Email" },
   });
+
+  // Already authenticated → go straight to dashboard. router.replace so the
+  // back button doesn't return them to the signup funnel.
+  useEffect(() => {
+    if (broker.getKey()) router.replace("/dashboard");
+  }, [router]);
 
   async function onSubmit(values: FormData) {
     try {
@@ -183,6 +191,7 @@ function FeatureLine({ children }: { children: React.ReactNode }) {
 }
 
 function SuccessDeed({ data }: { data: SignupResponse }) {
+  const router = useRouter();
   return (
     <div className="sheet-deed p-8 md:p-10">
       <div className="flex items-baseline justify-between gap-4 mb-6">
@@ -239,19 +248,17 @@ function SuccessDeed({ data }: { data: SignupResponse }) {
         </p>
       </div>
 
-      <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
-        <Link
-          href="/"
-          className="font-[family-name:var(--font-serif)] text-[0.95rem] text-[color:var(--color-ink-faint)] hover:text-[color:var(--color-ink)]"
-        >
-          ← الرئيسية
-        </Link>
-        <Link
-          href="/dashboard"
+      <p className="mt-8 font-[family-name:var(--font-serif)] italic text-[0.85rem] text-[color:var(--color-ink-faint)] text-center">
+        احفظ المفتاح ورابط الواتساب فوق قبل ما تكمّل.
+      </p>
+      <div className="mt-3 flex justify-end">
+        <button
+          type="button"
+          onClick={() => router.replace("/dashboard")}
           className="inline-flex h-11 items-center px-5 rounded-[var(--radius-sm)] bg-[color:var(--color-ink)] text-[color:var(--color-paper-cream)] font-[family-name:var(--font-serif)] text-[0.95rem] hover:bg-[color:var(--color-brick-deep)] transition-colors"
         >
           ادخل لوحة الوسيط ←
-        </Link>
+        </button>
       </div>
     </div>
   );

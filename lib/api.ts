@@ -56,6 +56,36 @@ async function call(
   return parsed;
 }
 
+async function callMultipart(
+  path: string,
+  authHeader: Record<string, string>,
+  formData: FormData,
+  signal?: AbortSignal,
+): Promise<unknown> {
+  if (!BASE) {
+    throw new ApiError(0, null, "NEXT_PUBLIC_API_BASE_URL is not configured");
+  }
+  const url = `${BASE.replace(/\/$/, "")}${path}`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { Accept: "application/json", ...authHeader },
+    body: formData,
+    signal,
+    cache: "no-store",
+  });
+  const text = await res.text();
+  let parsed: unknown = null;
+  if (text) {
+    try {
+      parsed = JSON.parse(text);
+    } catch {
+      parsed = text;
+    }
+  }
+  if (!res.ok) throw new ApiError(res.status, parsed, `HTTP ${res.status}`);
+  return parsed;
+}
+
 /* ─── Public (no auth) ──────────────────────────────────────── */
 
 export const apiPublic = {
@@ -91,6 +121,20 @@ export const apiBroker = {
       method: "PUT",
       body,
     }) as Promise<BrokerSettings>,
+  csvTemplate: () =>
+    apiBroker.call("/api/broker/inventory/csv-template") as Promise<CsvTemplate>,
+  uploadInventory: (file: File, signal?: AbortSignal) => {
+    const key = broker.getKey();
+    if (!key) throw new ApiError(401, null, "Missing X-Tenant-Key");
+    const fd = new FormData();
+    fd.append("file", file);
+    return callMultipart(
+      "/api/broker/inventory/upload",
+      { "X-Tenant-Key": key },
+      fd,
+      signal,
+    ) as Promise<InventoryUploadResult>;
+  },
 };
 
 /* ─── Admin (X-Admin-Key) ───────────────────────────────────── */
@@ -259,4 +303,28 @@ export interface FailedNotificationsResult {
   windowHours: number;
   count: number;
   items: FailedNotificationItem[];
+}
+
+export interface CsvTemplate {
+  required_columns: string[];
+  optional_columns: string[];
+  header_csv_line: string;
+  notes: string[];
+}
+
+export interface InventoryUploadError {
+  row: number;
+  reason: string;
+}
+
+export interface InventoryUploadResult {
+  tenant_id: number;
+  file: string;
+  total_rows: number;
+  succeeded: number;
+  skipped: number;
+  failed: number;
+  duration_ms: number;
+  errors_sample: InventoryUploadError[];
+  errors_total: number;
 }

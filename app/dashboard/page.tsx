@@ -6,10 +6,11 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { Tabs } from "@/components/Tabs";
 import { StatsSection } from "./_sections/StatsSection";
 import { LeadsSection } from "./_sections/LeadsSection";
+import { InventorySection } from "./_sections/InventorySection";
 import { SettingsSection } from "./_sections/SettingsSection";
 import { broker } from "@/lib/storage";
 
-type TabId = "stats" | "leads" | "settings";
+type TabId = "stats" | "leads" | "inventory" | "settings";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -53,6 +54,7 @@ export default function DashboardPage() {
           tabs={[
             { id: "stats", label: "نظرة عامة" },
             { id: "leads", label: "العملاء" },
+            { id: "inventory", label: "المخزون" },
             { id: "settings", label: "الإعدادات" },
           ]}
           active={tab}
@@ -62,6 +64,7 @@ export default function DashboardPage() {
         <div className="py-10">
           {tab === "stats" && <StatsSection />}
           {tab === "leads" && <LeadsSection />}
+          {tab === "inventory" && <InventorySection />}
           {tab === "settings" && <SettingsSection />}
         </div>
       </div>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SiteHeader } from "@/components/SiteHeader";
+import { AuthedRedirect } from "@/components/AuthedRedirect";
 
 const today = new Intl.DateTimeFormat("en-GB", {
   weekday: "long",
@@ -11,6 +12,7 @@ const today = new Intl.DateTimeFormat("en-GB", {
 export default function Home() {
   return (
     <>
+      <AuthedRedirect />
       <SiteHeader />
 
       {/* ─── HERO / MASTHEAD ──────────────────────────────────── */}
