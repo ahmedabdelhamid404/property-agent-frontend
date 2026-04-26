@@ -5,8 +5,8 @@ import {
   IBM_Plex_Sans_Arabic,
   Source_Serif_4,
 } from "next/font/google";
-import { Toaster } from "sonner";
 import { I18nProvider } from "@/components/I18nProvider";
+import { LocaleAwareToaster } from "@/components/LocaleAwareToaster";
 import "./globals.css";
 
 const geistMono = Geist_Mono({
@@ -55,19 +55,7 @@ export default function RootLayout({
       <body className="min-h-dvh">
         <I18nProvider>
           {children}
-          <Toaster
-            position="bottom-center"
-            toastOptions={{
-              style: {
-                fontFamily: "var(--font-body)",
-                background: "var(--color-bg-surface)",
-                color: "var(--color-fg-primary)",
-                border: "1px solid var(--color-border-subtle)",
-                borderRadius: "var(--radius-sm)",
-                boxShadow: "var(--shadow-card)",
-              },
-            }}
-          />
+          <LocaleAwareToaster />
         </I18nProvider>
       </body>
     </html>
