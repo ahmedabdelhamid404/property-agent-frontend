@@ -91,9 +91,32 @@ export function SiteHeader({ showBrokerSession }: Props) {
             <button
               type="button"
               onClick={signOut}
-              className="font-[family-name:var(--font-serif)] text-[0.85rem] tracking-[0.02em] uppercase text-[color:var(--color-ink-faint)] hover:text-[color:var(--color-brick)] transition-colors"
+              aria-label="تسجيل الخروج"
+              className={
+                "inline-flex items-center gap-2 h-9 px-3.5 rounded-[var(--radius-xs)] " +
+                "bg-[color:var(--color-paper-cream)] " +
+                "border border-[color:var(--color-rule-strong)] " +
+                "font-[family-name:var(--font-display)] text-[0.85rem] " +
+                "text-[color:var(--color-ink)] " +
+                "hover:border-[color:var(--color-brick)] hover:text-[color:var(--color-brick)] " +
+                "transition-colors"
+              }
             >
-              تسجيل الخروج
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="size-4"
+                aria-hidden
+              >
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+              <span>خروج</span>
             </button>
           </div>
         ) : (

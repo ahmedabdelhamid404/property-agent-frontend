@@ -11,6 +11,7 @@ import { Select } from "@/components/Select";
 import { Skeleton } from "@/components/Skeleton";
 import { apiBroker, type BrokerSettings } from "@/lib/api";
 import { copyToClipboard } from "@/lib/utils";
+import { resolveWhatsappLink } from "@/lib/whatsapp";
 
 const schema = z.object({
   businessName: z.string().min(2).max(120),
@@ -130,49 +131,50 @@ export function SettingsSection() {
 
       {/* Read-only sidebar — magic link details, account meta */}
       <aside className="space-y-7">
-        {settings?.magicCode ? (
-          <div className="sheet-deed p-7">
-            <p className="eyebrow mb-2">رابط الواتساب الخاص بيك</p>
-            <p className="font-[family-name:var(--font-body)] italic text-[0.95rem] text-[color:var(--color-ink-soft)] mb-4">
-              انشره في إعلاناتك. كل عميل يفتحه يوصل لمكتبك مباشرة.
-            </p>
-            <div className="border-y border-[color:var(--color-rule-strong)] py-4 my-4">
-              <p
-                className="font-[family-name:var(--font-mono)] text-[0.92rem] text-[color:var(--color-ink)] break-all leading-relaxed"
-                dir="ltr"
-              >
-                {settings.whatsappLink ?? `BR-${settings.magicCode}`}
+        {(() => {
+          const link = resolveWhatsappLink(
+            settings?.whatsappLink,
+            settings?.magicCode,
+          );
+          if (!link) return null;
+          return (
+            <div className="sheet-deed p-7">
+              <p className="eyebrow mb-2">رابط الواتساب الخاص بيك</p>
+              <p className="font-[family-name:var(--font-body)] italic text-[0.95rem] text-[color:var(--color-ink-soft)] mb-4">
+                انشره في إعلاناتك. كل عميل يفتحه يوصل لمكتبك مباشرة.
               </p>
-            </div>
-            <div className="flex items-center gap-5">
-              <button
-                type="button"
-                onClick={async () => {
-                  const target =
-                    settings.whatsappLink ?? `BR-${settings.magicCode}`;
-                  const ok = await copyToClipboard(target);
-                  if (ok)
-                    toast.success(
-                      settings.whatsappLink ? "الرابط اتنسخ" : "الكود اتنسخ",
-                    );
-                }}
-                className="font-[family-name:var(--font-serif)] text-[0.85rem] tracking-[0.04em] uppercase text-[color:var(--color-ink-faint)] hover:text-[color:var(--color-brick)] transition-colors"
-              >
-                {settings.whatsappLink ? "نسخ الرابط" : "نسخ الكود"}
-              </button>
-              {settings.whatsappLink ? (
+              <div className="border-y border-[color:var(--color-rule-strong)] py-4 my-4">
+                <p
+                  className="font-[family-name:var(--font-mono)] text-[0.92rem] text-[color:var(--color-ink)] break-all leading-relaxed"
+                  dir="ltr"
+                >
+                  {link}
+                </p>
+              </div>
+              <div className="flex items-center gap-5">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const ok = await copyToClipboard(link);
+                    if (ok) toast.success("الرابط اتنسخ");
+                    else toast.error("ما اتنسخش");
+                  }}
+                  className="font-[family-name:var(--font-serif)] text-[0.85rem] tracking-[0.04em] uppercase text-[color:var(--color-ink-faint)] hover:text-[color:var(--color-brick)] transition-colors"
+                >
+                  نسخ الرابط
+                </button>
                 <a
-                  href={settings.whatsappLink}
+                  href={link}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-[family-name:var(--font-serif)] text-[0.85rem] tracking-[0.04em] uppercase text-[color:var(--color-ink-faint)] hover:text-[color:var(--color-brick)] transition-colors"
                 >
                   افتح في واتساب ↗
                 </a>
-              ) : null}
+              </div>
             </div>
-          </div>
-        ) : null}
+          );
+        })()}
 
         {settings ? (
           <div className="sheet p-7">

@@ -14,6 +14,7 @@ import { Select } from "@/components/Select";
 import { apiPublic, ApiError, type SignupResponse } from "@/lib/api";
 import { broker } from "@/lib/storage";
 import { copyToClipboard } from "@/lib/utils";
+import { resolveWhatsappLink } from "@/lib/whatsapp";
 
 const schema = z.object({
   businessName: z
@@ -191,6 +192,7 @@ function FeatureLine({ children }: { children: React.ReactNode }) {
 
 function SuccessDeed({ data }: { data: SignupResponse }) {
   const router = useRouter();
+  const whatsappLink = resolveWhatsappLink(data.whatsappLink, data.magicCode);
   return (
     <div className="sheet-deed p-8 md:p-10">
       <div className="flex items-baseline justify-between gap-4 mb-6">
@@ -226,10 +228,10 @@ function SuccessDeed({ data }: { data: SignupResponse }) {
           monospace
           helper="استخدمه في رابط الواتساب: BR-{code}"
         />
-        {data.whatsappLink ? (
+        {whatsappLink ? (
           <KeyValueRow
             label="رابط الواتساب"
-            value={data.whatsappLink}
+            value={whatsappLink}
             monospace
             helper="Share with customers — they tap and arrive tagged to your office"
           />
@@ -241,7 +243,7 @@ function SuccessDeed({ data }: { data: SignupResponse }) {
         <p
           className="font-[family-name:var(--font-body)] text-[0.95rem] leading-[1.55] text-[color:var(--color-ink-soft)] break-words"
         >
-          {data.whatsappLink
+          {whatsappLink
             ? "انشر الرابط ده على الإعلانات والصفحات الرسمية. لما العميل يضغط عليه، يفتح واتساب على رقمنا، وبيوصلك مربوط باسمك تلقائياً."
             : data.magicLinkInstructions}
         </p>
