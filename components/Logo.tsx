@@ -1,10 +1,17 @@
 import { cn } from "@/lib/utils";
 
 /**
- * Wordmark + tiny sage glyph. Two stacked rounded squares offset
- * slightly — calm, geometric, no cultural pastiche.
+ * Wordmark + brand mark.
+ * Two stacked rounded squares — teal primary + gold accent.
+ * Geometric, calm, no cultural pastiche.
  */
-export function Logo({ className }: { className?: string }) {
+export function Logo({
+  className,
+  showWordmark = true,
+}: {
+  className?: string;
+  showWordmark?: boolean;
+}) {
   return (
     <span
       className={cn(
@@ -13,34 +20,31 @@ export function Logo({ className }: { className?: string }) {
         className,
       )}
     >
-      <svg
-        viewBox="0 0 32 32"
-        fill="none"
-        className="size-7"
-        aria-hidden
-      >
+      <svg viewBox="0 0 32 32" fill="none" className="size-8" aria-hidden>
         <rect
-          x="5"
-          y="5"
-          width="16"
-          height="16"
-          rx="3.5"
-          fill="var(--color-brick)"
-          opacity="0.85"
+          x="4"
+          y="4"
+          width="17"
+          height="17"
+          rx="4.5"
+          fill="var(--color-bg-brand)"
         />
         <rect
           x="11"
           y="11"
-          width="16"
-          height="16"
-          rx="3.5"
-          fill="var(--color-teal)"
-          opacity="0.9"
+          width="17"
+          height="17"
+          rx="4.5"
+          fill="var(--color-bg-accent)"
+          transform="rotate(-6 19.5 19.5)"
         />
       </svg>
-      <span className="text-[1.05rem] font-semibold tracking-[-0.01em] text-[color:var(--color-ink)]">
-        Property<span className="text-[color:var(--color-brick)]">·</span>Agent
-      </span>
+      {showWordmark ? (
+        <span className="text-[1.05rem] font-semibold tracking-[-0.015em] text-[color:var(--color-fg-primary)]">
+          Property
+          <span className="text-[color:var(--color-fg-brand)]">·</span>Agent
+        </span>
+      ) : null}
     </span>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -10,28 +10,15 @@ import { z } from "zod";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
+import { useI18n } from "@/components/I18nProvider";
 import { apiBroker, apiPublic, ApiError } from "@/lib/api";
 import { broker } from "@/lib/storage";
 
-const credsSchema = z.object({
-  email: z.string().email("الإيميل غير صحيح"),
-  password: z.string().min(1, "ادخل كلمة المرور"),
-});
-type CredsValues = z.infer<typeof credsSchema>;
-
-const apiKeySchema = z.object({
-  apiKey: z
-    .string()
-    .min(8, "المفتاح قصير جداً")
-    .regex(/^pa_[A-Za-z0-9]+$/, "المفتاح يبدأ بـ pa_ متبوعاً بحروف وأرقام"),
-});
-type ApiKeyValues = z.infer<typeof apiKeySchema>;
-
 export default function LoginPage() {
   const router = useRouter();
+  const { t } = useI18n();
   const [showApiKey, setShowApiKey] = useState(false);
 
-  // Already authed → straight to dashboard.
   useEffect(() => {
     if (broker.getKey()) router.replace("/dashboard");
   }, [router]);
@@ -40,36 +27,29 @@ export default function LoginPage() {
     <>
       <SiteHeader />
 
-      <div className="deck grid grid-cols-1 md:grid-cols-[1fr_minmax(0,460px)] gap-12 md:gap-20 py-14 md:py-20">
-        {/* ─── Left rail — soft pitch ───────────────────────── */}
-        <aside className="md:pe-8 md:border-e md:border-[color:var(--color-rule)] rise-1">
-          <p className="eyebrow mb-4">تسجيل الدخول</p>
-          <h1 className="font-[family-name:var(--font-display)] text-[clamp(2.2rem,4.6vw,3.4rem)] leading-[1.05] text-[color:var(--color-ink)] mb-6 max-w-[14ch]">
-            ارجع{" "}
-            <em className="not-italic text-[color:var(--color-brick)]">
-              للوحة وسيطك
-            </em>
+      <div className="deck grid grid-cols-1 md:grid-cols-[1fr_minmax(0,460px)] gap-12 md:gap-16 py-12 md:py-20">
+        <aside className="md:pe-8 rise-1">
+          <span className="eyebrow mb-4 block">{t("auth.loginEyebrow")}</span>
+          <h1 className="font-[family-name:var(--font-display)] text-[clamp(2rem,4.4vw,3.2rem)] leading-[1.05] tracking-[-0.022em] text-[color:var(--color-fg-primary)] mb-6 max-w-[14ch]">
+            {t("auth.loginTitlePart")}{" "}
+            <span className="text-[color:var(--color-fg-brand)]">
+              {t("auth.loginTitleAccent")}
+            </span>
           </h1>
-          <p className="font-[family-name:var(--font-body)] text-[1.1rem] leading-[1.6] text-[color:var(--color-ink-soft)] mb-7">
-            ادخل بالإيميل وكلمة المرور اللي اخترتهم وقت التسجيل. هنرجّعك على
-            لوحتك في ثواني.
+          <p className="font-[family-name:var(--font-body)] text-[1.05rem] leading-[1.6] text-[color:var(--color-fg-secondary)] mb-8 max-w-[42ch]">
+            {t("auth.loginBody")}
           </p>
-
-          <div className="border-t border-[color:var(--color-rule)] pt-6 space-y-4">
-            <p className="font-[family-name:var(--font-body)] text-[0.95rem] text-[color:var(--color-ink-soft)]">
-              لسه ما عندكش حساب؟{" "}
-              <Link
-                href="/signup"
-                className="text-[color:var(--color-brick)] linkish"
-              >
-                سجل وسيط جديد
+          <div className="border-t border-[color:var(--color-border-subtle)] pt-6">
+            <p className="font-[family-name:var(--font-body)] text-[0.95rem] text-[color:var(--color-fg-secondary)]">
+              {t("auth.noAccountQuestion")}{" "}
+              <Link href="/signup" className="text-[color:var(--color-fg-brand)] linkish font-medium">
+                {t("auth.noAccountCta")}
               </Link>
             </p>
           </div>
         </aside>
 
-        {/* ─── Form column ─────────────────────────────────── */}
-        <div className="rise-2 space-y-7">
+        <div className="rise-2 space-y-6">
           <CredsForm onSwitchToApiKey={() => setShowApiKey(true)} />
 
           {showApiKey ? (
@@ -79,9 +59,9 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setShowApiKey(true)}
-                className="font-[family-name:var(--font-serif)] text-[0.9rem] text-[color:var(--color-ink-faint)] hover:text-[color:var(--color-brick)] transition-colors"
+                className="font-[family-name:var(--font-display)] text-[0.88rem] text-[color:var(--color-fg-tertiary)] hover:text-[color:var(--color-fg-brand)] transition-colors"
               >
-                دخول بمفتاح API بدلاً عن ذلك ←
+                {t("auth.apiKeySwitch")}
               </button>
             </div>
           )}
@@ -93,35 +73,46 @@ export default function LoginPage() {
 
 function CredsForm({ onSwitchToApiKey }: { onSwitchToApiKey: () => void }) {
   const router = useRouter();
+  const { t } = useI18n();
+
+  const schema = useMemo(
+    () =>
+      z.object({
+        email: z.string().email(t("auth.wrongCreds")),
+        password: z.string().min(1, t("auth.passwordTooShort")),
+      }),
+    [t],
+  );
+  type Values = z.infer<typeof schema>;
+
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<CredsValues>({ resolver: zodResolver(credsSchema) });
+  } = useForm<Values>({ resolver: zodResolver(schema) });
 
-  async function onSubmit(values: CredsValues) {
+  async function onSubmit(values: Values) {
     try {
       const r = await apiPublic.login(values);
       broker.setKey(r.apiKey);
       broker.setProfile(r.tenantId, r.businessName);
-      toast.success("أهلاً بيك من جديد");
+      toast.success(t("auth.signinSuccess"));
       router.replace("/dashboard");
     } catch (err) {
       const apiErr = err as ApiError;
       const body = apiErr?.body as
         | { error?: string; passwordNotSet?: boolean }
         | null;
-      // 401 with passwordNotSet=true → legacy account, suggest API-key route
       if (apiErr?.status === 401 && body?.passwordNotSet) {
-        toast.error(body.error ?? "الحساب قديم — استعمل مفتاح API.");
+        toast.error(body.error ?? t("auth.wrongCreds"));
         onSwitchToApiKey();
         return;
       }
       const msg =
         body?.error ??
         (apiErr?.status === 401
-          ? "الإيميل أو كلمة المرور غير صحيحة"
-          : (apiErr?.message ?? "حصلت مشكلة، حاول تاني"));
+          ? t("auth.wrongCreds")
+          : (apiErr?.message ?? t("auth.genericError")));
       toast.error(msg);
     }
   }
@@ -130,19 +121,19 @@ function CredsForm({ onSwitchToApiKey }: { onSwitchToApiKey: () => void }) {
     <form
       noValidate
       onSubmit={handleSubmit(onSubmit)}
-      className="sheet p-8 md:p-10"
+      className="sheet p-7 md:p-9"
     >
       <div className="mb-7">
-        <p className="eyebrow mb-1.5">بياناتك</p>
-        <h2 className="font-[family-name:var(--font-display)] text-[1.7rem] text-[color:var(--color-ink)] tracking-tight">
-          الإيميل وكلمة المرور
+        <span className="eyebrow mb-1.5 block">{t("auth.credsEyebrow")}</span>
+        <h2 className="font-[family-name:var(--font-display)] text-[1.5rem] font-semibold tracking-[-0.015em] text-[color:var(--color-fg-primary)]">
+          {t("auth.credsTitle")}
         </h2>
       </div>
 
-      <div className="space-y-7">
+      <div className="space-y-5">
         <Input
           type="email"
-          label="الإيميل"
+          label={t("auth.emailLabel")}
           placeholder="ahmed@office.com"
           dir="ltr"
           autoComplete="email"
@@ -151,7 +142,7 @@ function CredsForm({ onSwitchToApiKey }: { onSwitchToApiKey: () => void }) {
         />
         <Input
           type="password"
-          label="كلمة المرور"
+          label={t("auth.passwordLabel")}
           dir="ltr"
           autoComplete="current-password"
           error={errors.password?.message}
@@ -159,15 +150,15 @@ function CredsForm({ onSwitchToApiKey }: { onSwitchToApiKey: () => void }) {
         />
       </div>
 
-      <div className="mt-9 pt-6 border-t border-[color:var(--color-rule)] flex items-center justify-between gap-4">
+      <div className="mt-8 pt-6 border-t border-[color:var(--color-border-subtle)] flex items-center justify-between gap-4">
         <Link
           href="/"
-          className="font-[family-name:var(--font-serif)] text-[0.95rem] text-[color:var(--color-ink-faint)] hover:text-[color:var(--color-ink)] transition-colors"
+          className="font-[family-name:var(--font-display)] text-[0.92rem] text-[color:var(--color-fg-tertiary)] hover:text-[color:var(--color-fg-primary)] transition-colors"
         >
-          ← الرجوع
+          ← {t("common.back")}
         </Link>
         <Button type="submit" loading={isSubmitting} size="lg">
-          ادخل
+          {t("auth.loginSubmit")}
         </Button>
       </div>
     </form>
@@ -176,19 +167,33 @@ function CredsForm({ onSwitchToApiKey }: { onSwitchToApiKey: () => void }) {
 
 function ApiKeyForm({ onCancel }: { onCancel: () => void }) {
   const router = useRouter();
+  const { t } = useI18n();
+
+  const schema = useMemo(
+    () =>
+      z.object({
+        apiKey: z
+          .string()
+          .min(8, "Key too short")
+          .regex(/^pa_[A-Za-z0-9]+$/, "Key starts with pa_"),
+      }),
+    [],
+  );
+  type Values = z.infer<typeof schema>;
+
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<ApiKeyValues>({ resolver: zodResolver(apiKeySchema) });
+  } = useForm<Values>({ resolver: zodResolver(schema) });
 
-  async function onSubmit(values: ApiKeyValues) {
+  async function onSubmit(values: Values) {
     const trimmed = values.apiKey.trim();
     broker.setKey(trimmed);
     try {
       const settings = await apiBroker.settings();
-      broker.setProfile(settings.id ?? 0, settings.businessName ?? "وسيط");
-      toast.success("أهلاً بيك من جديد");
+      broker.setProfile(settings.id ?? 0, settings.businessName ?? "Broker");
+      toast.success(t("auth.signinSuccess"));
       router.replace("/dashboard");
     } catch (err) {
       broker.clear();
@@ -196,9 +201,9 @@ function ApiKeyForm({ onCancel }: { onCancel: () => void }) {
       const status = apiErr?.status;
       const msg =
         status === 401 || status === 403
-          ? "المفتاح غير صحيح أو لم يعد ساري"
+          ? t("auth.apiKeyInvalid")
           : ((apiErr?.body as { error?: string } | null)?.error ??
-            "ما قدرتش أتأكد من المفتاح، حاول تاني");
+            t("auth.genericError"));
       toast.error(msg);
     }
   }
@@ -207,16 +212,15 @@ function ApiKeyForm({ onCancel }: { onCancel: () => void }) {
     <form
       noValidate
       onSubmit={handleSubmit(onSubmit)}
-      className="sheet-deed p-8"
+      className="sheet-deed p-7"
     >
       <div className="mb-6">
-        <p className="eyebrow mb-1.5">طريقة بديلة</p>
-        <h3 className="font-[family-name:var(--font-display)] text-[1.4rem] text-[color:var(--color-ink)] tracking-tight">
-          دخول بمفتاح API
+        <span className="eyebrow mb-1.5 block">{t("auth.apiKeyEyebrow")}</span>
+        <h3 className="font-[family-name:var(--font-display)] text-[1.25rem] font-semibold tracking-[-0.015em] text-[color:var(--color-fg-primary)]">
+          {t("auth.apiKeyTitle")}
         </h3>
-        <p className="mt-2 font-[family-name:var(--font-body)] text-[0.92rem] text-[color:var(--color-ink-soft)] leading-relaxed">
-          للحسابات القديمة اللي ماعندهاش كلمة مرور بعد. استخدم نفس المفتاح اللي
-          ظهر بعد التسجيل.
+        <p className="mt-2 font-[family-name:var(--font-body)] text-[0.9rem] text-[color:var(--color-fg-secondary)] leading-relaxed">
+          {t("auth.apiKeyBody")}
         </p>
       </div>
 
@@ -235,12 +239,12 @@ function ApiKeyForm({ onCancel }: { onCancel: () => void }) {
         <button
           type="button"
           onClick={onCancel}
-          className="font-[family-name:var(--font-serif)] text-[0.9rem] text-[color:var(--color-ink-faint)] hover:text-[color:var(--color-ink)] transition-colors"
+          className="font-[family-name:var(--font-display)] text-[0.88rem] text-[color:var(--color-fg-tertiary)] hover:text-[color:var(--color-fg-primary)] transition-colors"
         >
-          إلغاء
+          {t("common.cancel")}
         </button>
         <Button type="submit" loading={isSubmitting} variant="secondary">
-          ادخل بالمفتاح
+          {t("auth.apiKeySubmit")}
         </Button>
       </div>
     </form>

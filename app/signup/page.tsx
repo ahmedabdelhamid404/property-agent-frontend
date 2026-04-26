@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -11,35 +11,42 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
 import { Select } from "@/components/Select";
+import { useI18n } from "@/components/I18nProvider";
 import { apiPublic, ApiError, type SignupResponse } from "@/lib/api";
 import { broker } from "@/lib/storage";
 import { copyToClipboard } from "@/lib/utils";
 import { resolveWhatsappLink } from "@/lib/whatsapp";
 
-const schema = z
-  .object({
-    businessName: z
-      .string()
-      .min(2, "الاسم قصير جداً")
-      .max(120, "الاسم طويل جداً"),
-    brokerEmail: z.string().email("الإيميل غير صحيح"),
-    brokerPhone: z
-      .string()
-      .regex(/^\+?\d{8,15}$/, "رقم بصيغة E.164 (+201xxxxxxxxx)"),
-    password: z.string().min(8, "8 خانات على الأقل"),
-    confirmPassword: z.string(),
-    notificationChannel: z.enum(["Email", "WhatsApp", "Both"]),
-  })
-  .refine((d) => d.password === d.confirmPassword, {
-    path: ["confirmPassword"],
-    message: "كلمتا المرور غير متطابقتين",
-  });
-
-type FormData = z.infer<typeof schema>;
-
 export default function SignupPage() {
   const router = useRouter();
+  const { t } = useI18n();
   const [result, setResult] = useState<SignupResponse | null>(null);
+
+  const schema = useMemo(
+    () =>
+      z
+        .object({
+          businessName: z
+            .string()
+            .min(2, t("auth.signupEyebrow"))
+            .max(120),
+          brokerEmail: z.string().email("invalid email"),
+          brokerPhone: z
+            .string()
+            .regex(/^\+?\d{8,15}$/, "+201xxxxxxxxx"),
+          password: z.string().min(8, t("auth.passwordTooShort")),
+          confirmPassword: z.string(),
+          notificationChannel: z.enum(["Email", "WhatsApp", "Both"]),
+        })
+        .refine((d) => d.password === d.confirmPassword, {
+          path: ["confirmPassword"],
+          message: t("auth.passwordsMustMatch"),
+        }),
+    [t],
+  );
+
+  type FormData = z.infer<typeof schema>;
+
   const {
     register,
     handleSubmit,
@@ -49,27 +56,27 @@ export default function SignupPage() {
     defaultValues: { notificationChannel: "Email" },
   });
 
-  // Already authenticated → go straight to dashboard. router.replace so the
-  // back button doesn't return them to the signup funnel.
   useEffect(() => {
     if (broker.getKey()) router.replace("/dashboard");
   }, [router]);
 
   async function onSubmit(values: FormData) {
     try {
-      // confirmPassword is form-only — backend never sees it.
       const { confirmPassword: _confirm, ...payload } = values;
       void _confirm;
       const r = await apiPublic.signup(payload);
       broker.setKey(r.apiKey);
       broker.setProfile(r.tenantId, values.businessName);
+      toast.success(t("auth.signupSuccess"));
       setResult(r);
     } catch (err) {
       const apiErr = err as ApiError;
+      const status = apiErr?.status;
+      const body = apiErr?.body as { error?: string } | null;
       const msg =
-        (apiErr?.body as { error?: string } | null)?.error ??
-        apiErr?.message ??
-        "حصلت مشكلة، حاول تاني";
+        status === 409
+          ? t("auth.emailTaken")
+          : (body?.error ?? apiErr?.message ?? t("auth.genericError"));
       toast.error(msg);
     }
   }
@@ -78,87 +85,63 @@ export default function SignupPage() {
     <>
       <SiteHeader />
 
-      {/* Single-column on mobile, two-column on md+ — pull-quote left, form right.
-          Visual: a counter at the registry of brokers. */}
-      <div className="deck grid grid-cols-1 md:grid-cols-[1fr_minmax(0,460px)] gap-12 md:gap-20 py-14 md:py-20">
-        {/* ─── Pull-quote / pitch column ───────────────────── */}
-        <aside className="md:pe-8 md:border-e md:border-[color:var(--color-rule)] rise-1">
-          <p className="eyebrow mb-4">تسجيل وسيط جديد</p>
-          <h1 className="font-[family-name:var(--font-display)] text-[clamp(2.2rem,4.6vw,3.4rem)] leading-[1.05] text-[color:var(--color-ink)] mb-6 max-w-[14ch]">
-            ابدأ في{" "}
-            <em className="not-italic text-[color:var(--color-brick)]">
-              دقيقة واحدة
-            </em>
+      <div className="deck grid grid-cols-1 md:grid-cols-[1fr_minmax(0,500px)] gap-12 md:gap-16 py-12 md:py-20">
+        <aside className="md:pe-8 rise-1">
+          <span className="eyebrow mb-4 block">{t("auth.signupEyebrow")}</span>
+          <h1 className="font-[family-name:var(--font-display)] text-[clamp(2rem,4.6vw,3.4rem)] leading-[1.05] tracking-[-0.022em] text-[color:var(--color-fg-primary)] mb-6 max-w-[16ch]">
+            {t("auth.signupTitlePart")}{" "}
+            <span className="text-[color:var(--color-fg-brand)]">
+              {t("auth.signupTitleAccent")}
+            </span>{" "}
+            {t("auth.signupTitleEnd")}
           </h1>
-          <p className="font-[family-name:var(--font-body)] text-[1.15rem] leading-[1.55] text-[color:var(--color-ink-soft)] mb-7">
-            كل البيانات اللي بنطلبها بس عشان نعرف نوصّل لك العميل لما يطلبك.
-            مفيش خطوات إضافية، مفيش بطاقة ائتمان، مفيش تحقق.
+          <p className="font-[family-name:var(--font-body)] text-[1.05rem] leading-[1.6] text-[color:var(--color-fg-secondary)] mb-8 max-w-[44ch]">
+            {t("auth.signupBody")}
           </p>
 
-          <ul className="space-y-3.5 border-t border-[color:var(--color-rule)] pt-6">
-            <FeatureLine>
-              <strong>تنبيه فوري</strong> بإيميل أو واتساب لما العميل يطلبك
-            </FeatureLine>
-            <FeatureLine>
-              <strong>رابط واتساب</strong> خاص بيك تنشره في إعلاناتك
-            </FeatureLine>
-            <FeatureLine>
-              <strong>لوحة وسيط</strong> فيها العملاء، الفلترة، والإعدادات
-            </FeatureLine>
-            <FeatureLine>
-              <strong>API Key</strong> لو حابب تربط أنظمتك الخاصة
-            </FeatureLine>
+          <ul className="space-y-3.5 border-t border-[color:var(--color-border-subtle)] pt-7">
+            <FeatureLine>{t("how.step3Body")}</FeatureLine>
+            <FeatureLine>{t("how.step2Body")}</FeatureLine>
+            <FeatureLine>{t("how.step1Note")}</FeatureLine>
           </ul>
-
-          <p className="mt-8 font-[family-name:var(--font-serif)] italic text-[0.95rem] text-[color:var(--color-ink-faint)]">
-            المفتاح يصلك في الشاشة بعد التسجيل مباشرة.
-          </p>
         </aside>
 
-        {/* ─── Form / Deed column ─────────────────────────── */}
         <div className="rise-2">
           {!result ? (
-            <form
-              noValidate
-              onSubmit={handleSubmit(onSubmit)}
-              className="sheet p-8 md:p-10"
-            >
+            <form noValidate onSubmit={handleSubmit(onSubmit)} className="sheet p-7 md:p-9">
               <div className="mb-7">
-                <p className="eyebrow mb-1.5">نموذج التسجيل</p>
-                <h2 className="font-[family-name:var(--font-display)] text-[1.7rem] text-[color:var(--color-ink)] tracking-tight">
-                  بياناتك الأساسية
+                <span className="eyebrow mb-1.5 block">{t("nav.signup")}</span>
+                <h2 className="font-[family-name:var(--font-display)] text-[1.5rem] font-semibold tracking-[-0.015em] text-[color:var(--color-fg-primary)]">
+                  {t("auth.credsTitle")}
                 </h2>
               </div>
 
-              <div className="space-y-7">
+              <div className="space-y-5">
                 <Input
-                  label="اسم المكتب أو الشركة"
-                  placeholder="مكتب أحمد للعقارات"
+                  label={t("auth.businessName")}
+                  placeholder="Ahmed Real Estate"
                   error={errors.businessName?.message}
                   {...register("businessName")}
                 />
                 <Input
                   type="email"
-                  label="الإيميل"
+                  label={t("auth.brokerEmail")}
                   placeholder="ahmed@office.com"
-                  helper="هنبعت تنبيهات العملاء على الإيميل ده."
                   error={errors.brokerEmail?.message}
                   dir="ltr"
                   {...register("brokerEmail")}
                 />
                 <Input
-                  label="رقم الواتساب الشخصي"
+                  label={t("auth.brokerPhone")}
                   placeholder="+201012345678"
-                  helper="بصيغة E.164 — للتنبيهات على الواتساب."
                   error={errors.brokerPhone?.message}
                   dir="ltr"
                   {...register("brokerPhone")}
                 />
                 <Input
                   type="password"
-                  label="كلمة المرور"
-                  placeholder="8 خانات على الأقل"
-                  helper="هتستخدمها مع الإيميل عشان تدخل لوحتك."
+                  label={t("auth.passwordLabel")}
+                  placeholder={t("auth.passwordPlaceholder")}
                   autoComplete="new-password"
                   dir="ltr"
                   error={errors.password?.message}
@@ -166,34 +149,33 @@ export default function SignupPage() {
                 />
                 <Input
                   type="password"
-                  label="تأكيد كلمة المرور"
+                  label={t("auth.confirmPassword")}
                   autoComplete="new-password"
                   dir="ltr"
                   error={errors.confirmPassword?.message}
                   {...register("confirmPassword")}
                 />
                 <Select
-                  label="قناة التنبيه المفضلة"
+                  label={t("auth.channel")}
                   options={[
-                    { value: "Email", label: "إيميل فقط" },
-                    { value: "WhatsApp", label: "واتساب فقط" },
-                    { value: "Both", label: "الاتنين" },
+                    { value: "Email", label: t("auth.channelEmail") },
+                    { value: "WhatsApp", label: t("auth.channelWhatsApp") },
+                    { value: "Both", label: t("auth.channelBoth") },
                   ]}
-                  helper="تقدر تغيرها في أي وقت من الإعدادات."
                   error={errors.notificationChannel?.message}
                   {...register("notificationChannel")}
                 />
               </div>
 
-              <div className="mt-9 pt-6 border-t border-[color:var(--color-rule)] flex items-center justify-between gap-4">
+              <div className="mt-8 pt-6 border-t border-[color:var(--color-border-subtle)] flex items-center justify-between gap-4">
                 <Link
                   href="/login"
-                  className="font-[family-name:var(--font-serif)] text-[0.95rem] text-[color:var(--color-ink-faint)] hover:text-[color:var(--color-brick)] transition-colors"
+                  className="font-[family-name:var(--font-display)] text-[0.92rem] text-[color:var(--color-fg-tertiary)] hover:text-[color:var(--color-fg-brand)] transition-colors"
                 >
-                  عندك حساب؟ سجل الدخول
+                  {t("auth.noAccountQuestion")} {t("nav.login")}
                 </Link>
                 <Button type="submit" loading={isSubmitting} size="lg">
-                  سجّل واستلم المفتاح
+                  {t("auth.submitSignup")}
                 </Button>
               </div>
             </form>
@@ -208,11 +190,21 @@ export default function SignupPage() {
 
 function FeatureLine({ children }: { children: React.ReactNode }) {
   return (
-    <li className="flex items-start gap-3 font-[family-name:var(--font-body)] text-[1.05rem] text-[color:var(--color-ink-soft)] leading-[1.5]">
-      <span
-        aria-hidden
-        className="mt-2 size-1.5 rounded-full bg-[color:var(--color-brick)] shrink-0"
-      />
+    <li className="flex items-start gap-3 font-[family-name:var(--font-body)] text-[0.98rem] text-[color:var(--color-fg-secondary)] leading-[1.55]">
+      <span className="mt-1 size-5 rounded-full bg-[color:var(--color-mint-200)] inline-flex items-center justify-center shrink-0">
+        <svg
+          viewBox="0 0 12 12"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="size-3 text-[color:var(--color-mint-500)]"
+          aria-hidden
+        >
+          <polyline points="2 6 5 9 10 3" />
+        </svg>
+      </span>
       <span>{children}</span>
     </li>
   );
@@ -220,73 +212,52 @@ function FeatureLine({ children }: { children: React.ReactNode }) {
 
 function SuccessDeed({ data }: { data: SignupResponse }) {
   const router = useRouter();
+  const { t } = useI18n();
   const whatsappLink = resolveWhatsappLink(data.whatsappLink, data.magicCode);
   return (
-    <div className="sheet-deed p-8 md:p-10">
+    <div className="sheet-deed p-7 md:p-9">
       <div className="flex items-baseline justify-between gap-4 mb-6">
-        <p className="eyebrow">تم التسجيل</p>
+        <span className="eyebrow">{t("auth.signupSuccess")}</span>
         <p
-          className="font-[family-name:var(--font-mono)] text-[0.82rem] text-[color:var(--color-ink-faint)] tabular numerals"
+          className="font-[family-name:var(--font-mono)] text-[0.78rem] text-[color:var(--color-fg-tertiary)]"
           dir="ltr"
         >
           #{data.tenantId.toString().padStart(4, "0")}
         </p>
       </div>
 
-      <h2 className="font-[family-name:var(--font-display)] text-[2rem] leading-[1.05] text-[color:var(--color-ink)] mb-2 max-w-[16ch]">
-        تم التسجيل.{" "}
-        <em className="not-italic text-[color:var(--color-brick)]">
-          أهلاً بيك.
-        </em>
+      <h2 className="font-[family-name:var(--font-display)] text-[1.7rem] font-semibold tracking-[-0.018em] leading-[1.1] text-[color:var(--color-fg-primary)] mb-2">
+        {t("auth.successTitle")}
       </h2>
-      <p className="font-[family-name:var(--font-body)] italic text-[1rem] text-[color:var(--color-ink-soft)] mb-7">
-        احفظ المفتاح ده في مكان آمن — هتدخل بيه لوحتك في كل مرة.
+      <p className="font-[family-name:var(--font-body)] text-[0.98rem] text-[color:var(--color-fg-secondary)] mb-7 leading-relaxed">
+        {t("auth.successBody")}
       </p>
 
-      <div className="space-y-5">
-        <KeyValueRow
-          label="API Key"
-          value={data.apiKey}
-          monospace
-          helper="X-Tenant-Key header"
-        />
-        <KeyValueRow
-          label="رمز الإحالة"
-          value={data.magicCode}
-          monospace
-          helper="استخدمه في رابط الواتساب: BR-{code}"
-        />
+      <div className="space-y-4">
+        <KeyValueRow label="API Key" value={data.apiKey} monospace />
+        <KeyValueRow label="Magic code" value={data.magicCode} monospace />
         {whatsappLink ? (
-          <KeyValueRow
-            label="رابط الواتساب"
-            value={whatsappLink}
-            monospace
-            helper="Share with customers — they tap and arrive tagged to your office"
-          />
+          <KeyValueRow label="WhatsApp link" value={whatsappLink} monospace />
         ) : null}
       </div>
 
-      <div className="mt-8 pt-6 border-t border-[color:var(--color-rule-strong)]">
-        <p className="eyebrow mb-2">تعليمات النشر</p>
-        <p
-          className="font-[family-name:var(--font-body)] text-[0.95rem] leading-[1.55] text-[color:var(--color-ink-soft)] break-words"
-        >
-          {whatsappLink
-            ? "انشر الرابط ده على الإعلانات والصفحات الرسمية. لما العميل يضغط عليه، يفتح واتساب على رقمنا، وبيوصلك مربوط باسمك تلقائياً."
-            : data.magicLinkInstructions}
-        </p>
-      </div>
-
-      <p className="mt-8 font-[family-name:var(--font-serif)] italic text-[0.85rem] text-[color:var(--color-ink-faint)] text-center">
-        احفظ المفتاح ورابط الواتساب فوق قبل ما تكمّل.
-      </p>
-      <div className="mt-3 flex justify-end">
+      <div className="mt-8 pt-6 border-t border-[color:var(--color-border-subtle)] flex items-center justify-end gap-3">
+        {whatsappLink ? (
+          <a
+            href={whatsappLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex h-11 items-center px-5 rounded-full bg-[color:var(--color-bg-accent)] text-[color:var(--color-neutral-900)] font-[family-name:var(--font-display)] font-medium text-[0.92rem] hover:brightness-95 transition-all shadow-[var(--shadow-subtle)]"
+          >
+            {t("auth.whatsappCta")}
+          </a>
+        ) : null}
         <button
           type="button"
           onClick={() => router.replace("/dashboard")}
-          className="inline-flex h-11 items-center px-5 rounded-[var(--radius-sm)] bg-[color:var(--color-ink)] text-[color:var(--color-paper-cream)] font-[family-name:var(--font-serif)] text-[0.95rem] hover:bg-[color:var(--color-brick-deep)] transition-colors"
+          className="inline-flex h-11 items-center px-5 rounded-full bg-[color:var(--color-bg-brand)] text-[color:var(--color-fg-inverse)] font-[family-name:var(--font-display)] font-medium text-[0.92rem] hover:bg-[color:var(--color-bg-brand-hover)] transition-colors shadow-[var(--shadow-subtle)]"
         >
-          ادخل لوحة الوسيط ←
+          {t("auth.goToDashboard")} →
         </button>
       </div>
     </div>
@@ -297,50 +268,42 @@ function KeyValueRow({
   label,
   value,
   monospace,
-  helper,
 }: {
   label: string;
   value: string;
   monospace?: boolean;
-  helper?: string;
 }) {
+  const { t } = useI18n();
   async function copy() {
     const ok = await copyToClipboard(value);
-    if (ok) toast.success("اتنسخ");
-    else toast.error("ما اتنسخش");
+    if (ok) toast.success(t("common.copied"));
+    else toast.error(t("common.retry"));
   }
   return (
-    <div className="border-b border-[color:var(--color-rule)] pb-4">
-      <div className="flex items-baseline justify-between gap-3 mb-1.5">
-        <span className="eyebrow">{label}</span>
+    <div className="rounded-[var(--radius-sm)] border border-[color:var(--color-border-subtle)] bg-[color:var(--color-bg-canvas)] p-3.5">
+      <div className="flex items-baseline justify-between gap-3 mb-1">
+        <span className="font-[family-name:var(--font-display)] text-[0.74rem] font-semibold uppercase tracking-[0.06em] text-[color:var(--color-fg-tertiary)]">
+          {label}
+        </span>
         <button
           type="button"
           onClick={copy}
-          className="font-[family-name:var(--font-serif)] text-[0.78rem] tracking-[0.04em] uppercase text-[color:var(--color-ink-faint)] hover:text-[color:var(--color-brick)] transition-colors"
+          className="font-[family-name:var(--font-display)] text-[0.74rem] uppercase tracking-[0.05em] text-[color:var(--color-fg-tertiary)] hover:text-[color:var(--color-fg-brand)] transition-colors"
         >
-          نسخ
+          {t("common.copy")}
         </button>
       </div>
       <p
         className={
           (monospace
-            ? "font-[family-name:var(--font-mono)] tracking-[-0.01em]"
-            : "font-[family-name:var(--font-body)]") +
-          " text-[1rem] text-[color:var(--color-ink)] break-all leading-[1.45]"
+            ? "font-[family-name:var(--font-mono)] text-[0.92rem]"
+            : "font-[family-name:var(--font-body)] text-[0.95rem]") +
+          " text-[color:var(--color-fg-primary)] break-all leading-[1.45]"
         }
         dir="ltr"
       >
         {value}
       </p>
-      {helper ? (
-        <p
-          className="mt-1 font-[family-name:var(--font-serif)] italic text-[0.78rem] text-[color:var(--color-ink-faint)]"
-          dir="ltr"
-          lang="en"
-        >
-          {helper}
-        </p>
-      ) : null}
     </div>
   );
 }
