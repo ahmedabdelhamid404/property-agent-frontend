@@ -17,10 +17,28 @@ import { broker } from "@/lib/storage";
 import { copyToClipboard } from "@/lib/utils";
 import { resolveWhatsappLink } from "@/lib/whatsapp";
 
+type Step = 1 | 2 | 3;
+
+interface FormData {
+  businessName: string;
+  brokerEmail: string;
+  brokerPhone: string;
+  password: string;
+  confirmPassword: string;
+  notificationChannel: "Email" | "WhatsApp" | "Both";
+}
+
+const STEP_FIELDS: Record<Step, ReadonlyArray<keyof FormData>> = {
+  1: ["brokerEmail", "password", "confirmPassword"],
+  2: ["businessName", "brokerPhone"],
+  3: ["notificationChannel"],
+};
+
 export default function SignupPage() {
   const router = useRouter();
   const { t } = useI18n();
   const [result, setResult] = useState<SignupResponse | null>(null);
+  const [step, setStep] = useState<Step>(1);
 
   const schema = useMemo(
     () =>
@@ -45,20 +63,30 @@ export default function SignupPage() {
     [t],
   );
 
-  type FormData = z.infer<typeof schema>;
-
   const {
     register,
     handleSubmit,
+    trigger,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
+    mode: "onTouched",
     defaultValues: { notificationChannel: "Email" },
   });
 
   useEffect(() => {
     if (broker.getKey()) router.replace("/dashboard");
   }, [router]);
+
+  async function next() {
+    const valid = await trigger(STEP_FIELDS[step] as (keyof FormData)[]);
+    if (!valid) return;
+    setStep((s) => Math.min(3, s + 1) as Step);
+  }
+
+  function back() {
+    setStep((s) => Math.max(1, s - 1) as Step);
+  }
 
   async function onSubmit(values: FormData) {
     try {
@@ -78,6 +106,8 @@ export default function SignupPage() {
           ? t("auth.emailTaken")
           : (body?.error ?? apiErr?.message ?? t("auth.genericError"));
       toast.error(msg);
+      // Bounce back to step 1 if email is taken so they can fix it
+      if (status === 409) setStep(1);
     }
   }
 
@@ -108,75 +138,115 @@ export default function SignupPage() {
 
         <div className="rise-2">
           {!result ? (
-            <form noValidate onSubmit={handleSubmit(onSubmit)} className="sheet p-7 md:p-9">
-              <div className="mb-7">
-                <span className="eyebrow mb-1.5 block">{t("nav.signup")}</span>
-                <h2 className="font-[family-name:var(--font-display)] text-[1.5rem] font-semibold tracking-[-0.015em] text-[color:var(--color-fg-primary)]">
-                  {t("auth.credsTitle")}
+            <form
+              noValidate
+              onSubmit={handleSubmit(onSubmit)}
+              className="sheet p-6 md:p-9"
+            >
+              <StepProgress step={step} />
+
+              <div className="mt-7 mb-6">
+                <span className="eyebrow mb-1.5 block">
+                  {t(`auth.step${step}`)}
+                </span>
+                <h2 className="font-[family-name:var(--font-display)] text-[1.5rem] font-semibold tracking-[-0.015em] text-[color:var(--color-fg-primary)] mb-1.5">
+                  {t(`auth.step${stepKey(step)}Title`)}
                 </h2>
+                <p className="font-[family-name:var(--font-body)] text-[0.92rem] text-[color:var(--color-fg-secondary)] leading-relaxed">
+                  {t(`auth.step${stepKey(step)}Body`)}
+                </p>
               </div>
 
-              <div className="space-y-5">
-                <Input
-                  label={t("auth.businessName")}
-                  placeholder="Ahmed Real Estate"
-                  error={errors.businessName?.message}
-                  {...register("businessName")}
-                />
-                <Input
-                  type="email"
-                  label={t("auth.brokerEmail")}
-                  placeholder="ahmed@office.com"
-                  error={errors.brokerEmail?.message}
-                  dir="ltr"
-                  {...register("brokerEmail")}
-                />
-                <Input
-                  label={t("auth.brokerPhone")}
-                  placeholder="+201012345678"
-                  error={errors.brokerPhone?.message}
-                  dir="ltr"
-                  {...register("brokerPhone")}
-                />
-                <Input
-                  type="password"
-                  label={t("auth.passwordLabel")}
-                  placeholder={t("auth.passwordPlaceholder")}
-                  autoComplete="new-password"
-                  dir="ltr"
-                  error={errors.password?.message}
-                  {...register("password")}
-                />
-                <Input
-                  type="password"
-                  label={t("auth.confirmPassword")}
-                  autoComplete="new-password"
-                  dir="ltr"
-                  error={errors.confirmPassword?.message}
-                  {...register("confirmPassword")}
-                />
-                <Select
-                  label={t("auth.channel")}
-                  options={[
-                    { value: "Email", label: t("auth.channelEmail") },
-                    { value: "WhatsApp", label: t("auth.channelWhatsApp") },
-                    { value: "Both", label: t("auth.channelBoth") },
-                  ]}
-                  error={errors.notificationChannel?.message}
-                  {...register("notificationChannel")}
-                />
-              </div>
+              {step === 1 ? (
+                <div className="space-y-5">
+                  <Input
+                    type="email"
+                    label={t("auth.brokerEmail")}
+                    placeholder="ahmed@office.com"
+                    error={errors.brokerEmail?.message}
+                    dir="ltr"
+                    autoComplete="email"
+                    {...register("brokerEmail")}
+                  />
+                  <Input
+                    type="password"
+                    label={t("auth.passwordLabel")}
+                    placeholder={t("auth.passwordPlaceholder")}
+                    autoComplete="new-password"
+                    dir="ltr"
+                    error={errors.password?.message}
+                    {...register("password")}
+                  />
+                  <Input
+                    type="password"
+                    label={t("auth.confirmPassword")}
+                    autoComplete="new-password"
+                    dir="ltr"
+                    error={errors.confirmPassword?.message}
+                    {...register("confirmPassword")}
+                  />
+                </div>
+              ) : null}
+
+              {step === 2 ? (
+                <div className="space-y-5">
+                  <Input
+                    label={t("auth.businessName")}
+                    placeholder="Ahmed Real Estate"
+                    error={errors.businessName?.message}
+                    {...register("businessName")}
+                  />
+                  <Input
+                    label={t("auth.brokerPhone")}
+                    placeholder="+201012345678"
+                    error={errors.brokerPhone?.message}
+                    dir="ltr"
+                    {...register("brokerPhone")}
+                  />
+                </div>
+              ) : null}
+
+              {step === 3 ? (
+                <div className="space-y-5">
+                  <Select
+                    label={t("auth.channel")}
+                    options={[
+                      { value: "Email", label: t("auth.channelEmail") },
+                      { value: "WhatsApp", label: t("auth.channelWhatsApp") },
+                      { value: "Both", label: t("auth.channelBoth") },
+                    ]}
+                    error={errors.notificationChannel?.message}
+                    {...register("notificationChannel")}
+                  />
+                </div>
+              ) : null}
 
               <div className="mt-8 pt-6 border-t border-[color:var(--color-border-subtle)] flex items-center justify-between gap-4">
-                <Link
-                  href="/login"
-                  className="font-[family-name:var(--font-display)] text-[0.92rem] text-[color:var(--color-fg-tertiary)] hover:text-[color:var(--color-fg-brand)] transition-colors"
-                >
-                  {t("auth.noAccountQuestion")} {t("nav.login")}
-                </Link>
-                <Button type="submit" loading={isSubmitting} size="lg">
-                  {t("auth.submitSignup")}
-                </Button>
+                {step > 1 ? (
+                  <button
+                    type="button"
+                    onClick={back}
+                    className="font-[family-name:var(--font-display)] text-[0.92rem] text-[color:var(--color-fg-tertiary)] hover:text-[color:var(--color-fg-primary)] transition-colors"
+                  >
+                    {t("auth.previous")}
+                  </button>
+                ) : (
+                  <Link
+                    href="/login"
+                    className="font-[family-name:var(--font-display)] text-[0.92rem] text-[color:var(--color-fg-tertiary)] hover:text-[color:var(--color-fg-brand)] transition-colors"
+                  >
+                    {t("auth.noAccountQuestion")} {t("nav.login")}
+                  </Link>
+                )}
+                {step < 3 ? (
+                  <Button type="button" onClick={next} size="lg">
+                    {t("auth.next")}
+                  </Button>
+                ) : (
+                  <Button type="submit" loading={isSubmitting} size="lg">
+                    {t("auth.submitSignup")}
+                  </Button>
+                )}
               </div>
             </form>
           ) : (
@@ -187,6 +257,91 @@ export default function SignupPage() {
     </>
   );
 }
+
+function stepKey(s: Step): "Account" | "Business" | "Channel" {
+  return s === 1 ? "Account" : s === 2 ? "Business" : "Channel";
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   Step progress indicator
+   ────────────────────────────────────────────────────────────────── */
+
+function StepProgress({ step }: { step: Step }) {
+  const { t } = useI18n();
+  const labels = [t("auth.step1"), t("auth.step2"), t("auth.step3")];
+  return (
+    <div className="flex items-center gap-2">
+      {labels.map((label, i) => {
+        const idx = (i + 1) as Step;
+        const completed = step > idx;
+        const active = step === idx;
+        return (
+          <div
+            key={label}
+            className="flex items-center gap-2 flex-1 last:flex-none"
+          >
+            <div
+              className={
+                "size-7 shrink-0 rounded-full inline-flex items-center justify-center " +
+                "font-[family-name:var(--font-display)] text-[0.78rem] font-semibold " +
+                "transition-colors duration-200 " +
+                (completed
+                  ? "bg-[color:var(--color-bg-brand)] text-[color:var(--color-fg-inverse)]"
+                  : active
+                    ? "bg-[color:var(--color-bg-brand-soft)] text-[color:var(--color-fg-brand)] ring-2 ring-[color:var(--color-bg-brand)]"
+                    : "bg-[color:var(--color-bg-sunken)] text-[color:var(--color-fg-tertiary)]")
+              }
+              aria-current={active ? "step" : undefined}
+            >
+              {completed ? (
+                <svg
+                  viewBox="0 0 12 12"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="size-3"
+                  aria-hidden
+                >
+                  <polyline points="2 6 5 9 10 3" />
+                </svg>
+              ) : (
+                <span dir="ltr">{idx}</span>
+              )}
+            </div>
+            <span
+              className={
+                "font-[family-name:var(--font-display)] text-[0.82rem] hidden sm:block " +
+                (active
+                  ? "text-[color:var(--color-fg-primary)] font-semibold"
+                  : completed
+                    ? "text-[color:var(--color-fg-secondary)] font-medium"
+                    : "text-[color:var(--color-fg-tertiary)]")
+              }
+            >
+              {label}
+            </span>
+            {i < labels.length - 1 ? (
+              <div
+                className={
+                  "h-px flex-1 transition-colors duration-200 " +
+                  (completed
+                    ? "bg-[color:var(--color-bg-brand)]"
+                    : "bg-[color:var(--color-border-subtle)]")
+                }
+              />
+            ) : null}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   Existing components
+   ────────────────────────────────────────────────────────────────── */
 
 function FeatureLine({ children }: { children: React.ReactNode }) {
   return (
