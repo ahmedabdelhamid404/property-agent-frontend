@@ -70,10 +70,13 @@ export function InventorySection() {
       setResult(r);
       setPhase("done");
       const ok = formatNumber(r.succeeded);
+      const bad = formatNumber(r.failed + r.skipped);
       if (r.failed === 0 && r.skipped === 0) {
-        toast.success(`✓ ${ok}`);
+        toast.success(`${t("dashboard.inventory.col.succeeded")}: ${ok}`);
       } else {
-        toast.success(`✓ ${ok} · ✗ ${r.failed + r.skipped}`);
+        toast.success(
+          `${t("dashboard.inventory.col.succeeded")}: ${ok} · ${t("dashboard.inventory.col.failed")}: ${bad}`,
+        );
       }
     } catch (err) {
       const apiErr = err as ApiError;
