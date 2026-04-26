@@ -126,7 +126,7 @@ function PhotoCover() {
         zIndex: 0,
         backgroundImage: `url('${VILLA_PHOTO}')`,
         backgroundSize: "cover",
-        backgroundPosition: "8% 50%",
+        backgroundPosition: "75% 50%",
         backgroundRepeat: "no-repeat",
         WebkitMaskImage: mask,
         maskImage: mask,
