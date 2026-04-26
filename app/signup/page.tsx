@@ -158,10 +158,10 @@ export default function SignupPage() {
 
               <div className="mt-9 pt-6 border-t border-[color:var(--color-rule)] flex items-center justify-between gap-4">
                 <Link
-                  href="/"
-                  className="font-[family-name:var(--font-serif)] text-[0.95rem] text-[color:var(--color-ink-faint)] hover:text-[color:var(--color-ink)] transition-colors"
+                  href="/login"
+                  className="font-[family-name:var(--font-serif)] text-[0.95rem] text-[color:var(--color-ink-faint)] hover:text-[color:var(--color-brick)] transition-colors"
                 >
-                  ← الرجوع
+                  عندك حساب؟ سجل الدخول
                 </Link>
                 <Button type="submit" loading={isSubmitting} size="lg">
                   سجّل واستلم المفتاح

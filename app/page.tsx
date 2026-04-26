@@ -36,10 +36,10 @@ export default function Home() {
               ابدأ مجاناً — 30 ثانية
             </Link>
             <Link
-              href="/dashboard"
+              href="/login"
               className="font-[family-name:var(--font-serif)] text-[1rem] text-[color:var(--color-ink)] linkish"
             >
-              عندك حساب؟ ادخل لوحتك ←
+              عندك حساب؟ سجل الدخول ←
             </Link>
           </div>
 

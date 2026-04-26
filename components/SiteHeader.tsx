@@ -7,27 +7,35 @@ import { Logo } from "./Logo";
 import { broker } from "@/lib/storage";
 
 interface Props {
-  /** When true, show a "Sign out" affordance and the broker's business name. */
+  /** When true, also surface the broker's business name in the right rail. */
   showBrokerSession?: boolean;
 }
+
+const ALL_LINKS = [
+  { href: "/", label: "الرئيسية", authedOnly: false, unauthedOnly: false },
+  { href: "/login", label: "سجّل الدخول", authedOnly: false, unauthedOnly: true },
+  { href: "/signup", label: "سجّل وسيط", authedOnly: false, unauthedOnly: true },
+];
 
 export function SiteHeader({ showBrokerSession }: Props) {
   const pathname = usePathname();
   const router = useRouter();
+  const [authed, setAuthed] = useState<boolean>(false);
   const [name, setName] = useState<string | null>(null);
+  const [hydrated, setHydrated] = useState<boolean>(false);
 
   useEffect(() => {
-    if (showBrokerSession) {
-      const p = broker.getProfile();
-      setName(p.name);
-    }
-  }, [showBrokerSession]);
+    const has = !!broker.getKey();
+    setAuthed(has);
+    if (has) setName(broker.getProfile().name);
+    setHydrated(true);
+  }, [showBrokerSession, pathname]);
 
-  const links = [
-    { href: "/", label: "الرئيسية", labelEn: "Home" },
-    { href: "/signup", label: "سجّل", labelEn: "Sign up" },
-    { href: "/dashboard", label: "لوحة الوسيط", labelEn: "Dashboard" },
-  ];
+  const visibleLinks = ALL_LINKS.filter((l) => {
+    if (!hydrated) return !l.authedOnly && !l.unauthedOnly;
+    if (authed) return !l.unauthedOnly;
+    return !l.authedOnly;
+  });
 
   function signOut() {
     broker.clear();
@@ -41,7 +49,7 @@ export function SiteHeader({ showBrokerSession }: Props) {
           <Logo />
         </Link>
         <nav className="hidden md:flex items-center gap-7" aria-label="Primary">
-          {links.map((l) => {
+          {visibleLinks.map((l) => {
             const active = pathname === l.href;
             return (
               <Link
@@ -71,10 +79,12 @@ export function SiteHeader({ showBrokerSession }: Props) {
             );
           })}
         </nav>
-        {showBrokerSession ? (
+
+        {/* Right rail — sign-out (authed) or sign-up CTA (unauthed). */}
+        {hydrated && authed ? (
           <div className="flex items-center gap-3 ms-auto md:ms-0">
-            {name ? (
-              <span className="hidden sm:block font-[family-name:var(--font-serif)] italic text-[0.92rem] text-[color:var(--color-ink-soft)] truncate max-w-[200px]">
+            {showBrokerSession && name ? (
+              <span className="hidden sm:block font-[family-name:var(--font-body)] text-[0.92rem] text-[color:var(--color-ink-soft)] truncate max-w-[200px]">
                 {name}
               </span>
             ) : null}
