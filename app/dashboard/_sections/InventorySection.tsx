@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/Button";
+import { useI18n } from "@/components/I18nProvider";
 import {
   apiBroker,
   ApiError,
@@ -14,6 +15,7 @@ import { formatNumber } from "@/lib/utils";
 type Phase = "idle" | "uploading" | "done";
 
 export function InventorySection() {
+  const { t } = useI18n();
   const [file, setFile] = useState<File | null>(null);
   const [phase, setPhase] = useState<Phase>("idle");
   const [result, setResult] = useState<InventoryUploadResult | null>(null);
@@ -24,11 +26,11 @@ export function InventorySection() {
   function pickFile(f: File | null) {
     if (!f) return;
     if (!f.name.toLowerCase().endsWith(".csv")) {
-      toast.error("الملف لازم يكون CSV");
+      toast.error(t("dashboard.inventory.mustBeCsv"));
       return;
     }
     if (f.size > 20 * 1024 * 1024) {
-      toast.error("الحد الأقصى 20 ميجا");
+      toast.error(t("dashboard.inventory.maxSize"));
       return;
     }
     setFile(f);
@@ -51,9 +53,9 @@ export function InventorySection() {
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
-      toast.success("النموذج اتنزّل");
+      toast.success(t("dashboard.inventory.downloadOk"));
     } catch {
-      toast.error("ما قدرتش أنزّل النموذج");
+      toast.error(t("dashboard.inventory.downloadFailed"));
     } finally {
       setDownloading(false);
     }
@@ -67,17 +69,18 @@ export function InventorySection() {
       const r = await apiBroker.uploadInventory(file);
       setResult(r);
       setPhase("done");
+      const ok = formatNumber(r.succeeded);
       if (r.failed === 0 && r.skipped === 0) {
-        toast.success(`اتسجّل ${formatNumber(r.succeeded)} عقار`);
+        toast.success(`✓ ${ok}`);
       } else {
-        toast.success(`تم. نجح ${r.succeeded} و فشل ${r.failed + r.skipped}`);
+        toast.success(`✓ ${ok} · ✗ ${r.failed + r.skipped}`);
       }
     } catch (err) {
       const apiErr = err as ApiError;
       const msg =
         (apiErr?.body as { error?: string } | null)?.error ??
         apiErr?.message ??
-        "حصلت مشكلة في الرفع";
+        t("dashboard.inventory.uploadFailed");
       toast.error(msg);
       setPhase("idle");
     }
@@ -92,20 +95,19 @@ export function InventorySection() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(0,360px)] gap-12">
-      {/* ─── Upload column ─────────────────────────────────────── */}
       <section className="space-y-7">
         <div>
-          <p className="eyebrow mb-1.5">رفع المخزون</p>
-          <h2 className="font-[family-name:var(--font-display)] text-[1.7rem] text-[color:var(--color-ink)] tracking-tight">
-            ضمّ عقاراتك للذكاء
+          <span className="eyebrow mb-1.5 block">
+            {t("dashboard.inventory.eyebrow")}
+          </span>
+          <h2 className="font-[family-name:var(--font-display)] text-[1.5rem] font-semibold tracking-[-0.015em] text-[color:var(--color-fg-primary)]">
+            {t("dashboard.inventory.title")}
           </h2>
-          <p className="mt-2 font-[family-name:var(--font-body)] italic text-[0.98rem] text-[color:var(--color-ink-soft)] max-w-prose">
-            ارفع ملف CSV فيه عقاراتك. كل صف يدخل في خزينة مكتبك ويبدأ يظهر
-            للعملاء على الواتساب فوراً.
+          <p className="mt-2 font-[family-name:var(--font-body)] text-[0.95rem] text-[color:var(--color-fg-secondary)] max-w-prose leading-relaxed">
+            {t("dashboard.inventory.body")}
           </p>
         </div>
 
-        {/* Dropzone */}
         <label
           onDragOver={(e) => {
             e.preventDefault();
@@ -121,7 +123,7 @@ export function InventorySection() {
           className={
             "block sheet p-9 cursor-pointer text-center transition-colors " +
             (dragOver
-              ? "border-[color:var(--color-brick)] bg-[color:var(--color-brick-tint)]"
+              ? "!border-[color:var(--color-fg-brand)] bg-[color:var(--color-bg-brand-soft)]"
               : "")
           }
         >
@@ -132,17 +134,21 @@ export function InventorySection() {
             className="sr-only"
             onChange={(e) => pickFile(e.target.files?.[0] ?? null)}
           />
-          <p className="eyebrow mb-2">
-            {file ? "ملف جاهز" : "اسحب الملف هنا"}
-          </p>
-          <p className="font-[family-name:var(--font-display)] text-[1.4rem] text-[color:var(--color-ink)] mb-1.5 break-all">
-            {file ? file.name : "أو اضغط للاختيار"}
+          <span className="eyebrow mb-2 block">
+            {file
+              ? t("dashboard.inventory.fileReady")
+              : t("dashboard.inventory.dropPrompt")}
+          </span>
+          <p className="font-[family-name:var(--font-display)] text-[1.25rem] font-semibold text-[color:var(--color-fg-primary)] mb-1.5 break-all">
+            {file ? file.name : t("dashboard.inventory.orPick")}
           </p>
           <p
-            className="font-[family-name:var(--font-serif)] text-[0.85rem] text-[color:var(--color-ink-faint)]"
+            className="font-[family-name:var(--font-mono)] text-[0.82rem] text-[color:var(--color-fg-tertiary)]"
             dir="ltr"
           >
-            {file ? `${(file.size / 1024).toFixed(1)} KB` : "CSV · max 20 MB"}
+            {file
+              ? `${(file.size / 1024).toFixed(1)} KB`
+              : t("dashboard.inventory.sizeMaxHint")}
           </p>
         </label>
 
@@ -151,9 +157,9 @@ export function InventorySection() {
             <button
               type="button"
               onClick={reset}
-              className="font-[family-name:var(--font-serif)] text-[0.9rem] text-[color:var(--color-ink-faint)] hover:text-[color:var(--color-brick)] transition-colors"
+              className="font-[family-name:var(--font-display)] text-[0.88rem] text-[color:var(--color-fg-tertiary)] hover:text-[color:var(--color-fg-brand)] transition-colors"
             >
-              ← اختار ملف تاني
+              {t("dashboard.inventory.switchFile")}
             </button>
           ) : (
             <span />
@@ -165,17 +171,18 @@ export function InventorySection() {
             disabled={!file || phase === "uploading"}
             size="lg"
           >
-            ارفع للذكاء
+            {t("dashboard.inventory.uploadCta")}
           </Button>
         </div>
 
-        {/* Result */}
         {result ? (
           <div className="sheet-deed p-7 mt-2">
             <div className="flex items-baseline justify-between gap-4 mb-5">
-              <p className="eyebrow">نتيجة الرفع</p>
+              <span className="eyebrow">
+                {t("dashboard.inventory.resultEyebrow")}
+              </span>
               <p
-                className="font-[family-name:var(--font-serif)] italic text-[0.85rem] text-[color:var(--color-ink-faint)]"
+                className="font-[family-name:var(--font-mono)] text-[0.82rem] text-[color:var(--color-fg-tertiary)]"
                 dir="ltr"
               >
                 {result.duration_ms}ms
@@ -183,28 +190,43 @@ export function InventorySection() {
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-y-5 gap-x-4 mb-6">
-              <Stat label="إجمالي" value={result.total_rows} />
-              <Stat label="نجح" value={result.succeeded} accent="ok" />
-              <Stat label="مكرر/مهمل" value={result.skipped} accent="warn" />
-              <Stat label="فشل" value={result.failed} accent="err" />
+              <Stat
+                label={t("dashboard.inventory.col.total")}
+                value={result.total_rows}
+              />
+              <Stat
+                label={t("dashboard.inventory.col.succeeded")}
+                value={result.succeeded}
+                accent="ok"
+              />
+              <Stat
+                label={t("dashboard.inventory.col.skipped")}
+                value={result.skipped}
+                accent="warn"
+              />
+              <Stat
+                label={t("dashboard.inventory.col.failed")}
+                value={result.failed}
+                accent="err"
+              />
             </div>
 
             {result.errors_sample.length > 0 ? (
-              <div className="border-t border-[color:var(--color-rule-strong)] pt-5">
-                <p className="eyebrow mb-3">
-                  أول {result.errors_sample.length} خطأ
+              <div className="border-t border-[color:var(--color-border-subtle)] pt-5">
+                <span className="eyebrow mb-3 block">
+                  {`${result.errors_sample.length} ${t("dashboard.inventory.errorsHeader")}`}
                   {result.errors_total > result.errors_sample.length
-                    ? ` (من إجمالي ${result.errors_total})`
+                    ? ` / ${result.errors_total}`
                     : ""}
-                </p>
+                </span>
                 <ul className="space-y-2 max-h-64 overflow-auto pe-2">
                   {result.errors_sample.map((e, i) => (
                     <li
                       key={i}
-                      className="font-[family-name:var(--font-mono)] text-[0.82rem] text-[color:var(--color-ink-soft)] leading-snug"
+                      className="font-[family-name:var(--font-mono)] text-[0.82rem] text-[color:var(--color-fg-secondary)] leading-snug"
                       dir="ltr"
                     >
-                      <span className="text-[color:var(--color-err)]">
+                      <span className="text-[color:var(--color-error)]">
                         row {e.row}:
                       </span>{" "}
                       {e.reason}
@@ -217,12 +239,13 @@ export function InventorySection() {
         ) : null}
       </section>
 
-      {/* ─── Side rail — template + tips ───────────────────────── */}
       <aside className="space-y-7">
         <div className="sheet-deed p-7">
-          <p className="eyebrow mb-2">نموذج CSV</p>
-          <p className="font-[family-name:var(--font-body)] italic text-[0.95rem] text-[color:var(--color-ink-soft)] mb-5">
-            نزّل ملف فاضي بكل الأعمدة المطلوبة، املاه بعقاراتك، وارفعه.
+          <span className="eyebrow mb-2 block">
+            {t("dashboard.inventory.templateEyebrow")}
+          </span>
+          <p className="font-[family-name:var(--font-body)] text-[0.92rem] text-[color:var(--color-fg-secondary)] mb-5 leading-relaxed">
+            {t("dashboard.inventory.templateBody")}
           </p>
           <Button
             type="button"
@@ -231,13 +254,18 @@ export function InventorySection() {
             loading={downloading}
             className="w-full"
           >
-            ↓ تحميل النموذج
+            {t("dashboard.inventory.downloadTemplate")}
           </Button>
         </div>
 
         <div className="sheet p-7">
-          <p className="eyebrow mb-3">الأعمدة الأساسية</p>
-          <ul className="space-y-2 font-[family-name:var(--font-mono)] text-[0.85rem] text-[color:var(--color-ink)]" dir="ltr">
+          <span className="eyebrow mb-3 block">
+            {t("dashboard.inventory.columnsEyebrow")}
+          </span>
+          <ul
+            className="space-y-2 font-[family-name:var(--font-mono)] text-[0.85rem] text-[color:var(--color-fg-primary)]"
+            dir="ltr"
+          >
             {[
               "title",
               "city",
@@ -248,14 +276,14 @@ export function InventorySection() {
             ].map((c) => (
               <li
                 key={c}
-                className="flex items-center gap-2 before:content-['▸'] before:text-[color:var(--color-brick)] before:text-[0.9em]"
+                className="flex items-center gap-2 before:content-['▸'] before:text-[color:var(--color-fg-brand)] before:text-[0.9em]"
               >
                 {c}
               </li>
             ))}
           </ul>
-          <p className="mt-4 font-[family-name:var(--font-serif)] italic text-[0.85rem] text-[color:var(--color-ink-faint)]">
-            في النموذج فيه أعمدة اختيارية كتير لو حابب تدّيها للذكاء.
+          <p className="mt-4 font-[family-name:var(--font-body)] text-[0.85rem] text-[color:var(--color-fg-tertiary)]">
+            {t("dashboard.inventory.columnsTip")}
           </p>
         </div>
       </aside>
@@ -274,18 +302,18 @@ function Stat({
 }) {
   const color =
     accent === "ok"
-      ? "text-[color:var(--color-ok)]"
+      ? "text-[color:var(--color-success)]"
       : accent === "warn"
         ? "text-[color:var(--color-warn)]"
         : accent === "err"
-          ? "text-[color:var(--color-err)]"
-          : "text-[color:var(--color-ink)]";
+          ? "text-[color:var(--color-error)]"
+          : "text-[color:var(--color-fg-primary)]";
   return (
     <div>
-      <p className="eyebrow mb-1">{label}</p>
+      <span className="eyebrow mb-1 block">{label}</span>
       <p
         className={
-          "font-[family-name:var(--font-display)] text-[1.7rem] tabular-nums " +
+          "font-[family-name:var(--font-display)] text-[1.6rem] font-semibold tabular-nums " +
           color
         }
         dir="ltr"

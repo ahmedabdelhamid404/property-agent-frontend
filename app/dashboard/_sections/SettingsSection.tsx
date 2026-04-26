@@ -9,6 +9,7 @@ import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
 import { Select } from "@/components/Select";
 import { Skeleton } from "@/components/Skeleton";
+import { useI18n } from "@/components/I18nProvider";
 import { apiBroker, type BrokerSettings } from "@/lib/api";
 import { copyToClipboard } from "@/lib/utils";
 import { resolveWhatsappLink } from "@/lib/whatsapp";
@@ -22,6 +23,7 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export function SettingsSection() {
+  const { t } = useI18n();
   const [loading, setLoading] = useState(true);
   const [settings, setSettings] = useState<BrokerSettings | null>(null);
   const {
@@ -45,21 +47,21 @@ export function SettingsSection() {
           notificationChannel: s.notificationChannel ?? "Email",
         });
       })
-      .catch(() => toast.error("ما قدرتش أحمّل الإعدادات"))
+      .catch(() => toast.error(t("dashboard.settings.loadFailed")))
       .finally(() => !cancelled && setLoading(false));
     return () => {
       cancelled = true;
     };
-  }, [reset]);
+  }, [reset, t]);
 
   async function onSubmit(values: FormData) {
     try {
       const updated = await apiBroker.updateSettings(values);
       setSettings(updated);
       reset(values);
-      toast.success("الإعدادات اتحفظت");
+      toast.success(t("dashboard.settings.saved"));
     } catch {
-      toast.error("ما قدرتش أحفظ الإعدادات");
+      toast.error(t("dashboard.settings.saveFailed"));
     }
   }
 
@@ -78,58 +80,59 @@ export function SettingsSection() {
     <div className="grid grid-cols-1 md:grid-cols-[minmax(0,560px)_minmax(0,1fr)] gap-12">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="sheet p-8 md:p-10 self-start"
+        className="sheet p-7 md:p-9 self-start"
       >
         <div className="mb-7">
-          <p className="eyebrow mb-1.5">الملف الشخصي</p>
-          <h2 className="font-[family-name:var(--font-display)] text-[1.7rem] text-[color:var(--color-ink)] tracking-tight">
-            بيانات المكتب
+          <span className="eyebrow mb-1.5 block">
+            {t("dashboard.settings.profileEyebrow")}
+          </span>
+          <h2 className="font-[family-name:var(--font-display)] text-[1.4rem] font-semibold tracking-[-0.015em] text-[color:var(--color-fg-primary)]">
+            {t("dashboard.settings.profileTitle")}
           </h2>
         </div>
 
-        <div className="space-y-7">
+        <div className="space-y-5">
           <Input
-            label="اسم المكتب"
+            label={t("dashboard.settings.businessName")}
             error={errors.businessName?.message}
             {...register("businessName")}
           />
           <Input
             type="email"
-            label="إيميل التنبيهات"
+            label={t("dashboard.settings.notifEmail")}
             dir="ltr"
             error={errors.contactEmail?.message}
             {...register("contactEmail")}
           />
           <Input
-            label="رقم واتساب الوسيط"
+            label={t("dashboard.settings.brokerPhone")}
             dir="ltr"
             error={errors.brokerPhone?.message}
             {...register("brokerPhone")}
           />
           <Select
-            label="قناة التنبيه"
+            label={t("dashboard.settings.channel")}
             options={[
-              { value: "Email", label: "إيميل فقط" },
-              { value: "WhatsApp", label: "واتساب فقط" },
-              { value: "Both", label: "الاتنين" },
+              { value: "Email", label: t("auth.channelEmail") },
+              { value: "WhatsApp", label: t("auth.channelWhatsApp") },
+              { value: "Both", label: t("auth.channelBoth") },
             ]}
             error={errors.notificationChannel?.message}
             {...register("notificationChannel")}
           />
         </div>
 
-        <div className="mt-9 pt-6 border-t border-[color:var(--color-rule)] flex items-center justify-end">
+        <div className="mt-8 pt-6 border-t border-[color:var(--color-border-subtle)] flex items-center justify-end">
           <Button
             type="submit"
             loading={isSubmitting}
             disabled={!isDirty || isSubmitting}
           >
-            حفظ التعديلات
+            {t("dashboard.settings.save")}
           </Button>
         </div>
       </form>
 
-      {/* Read-only sidebar — magic link details, account meta */}
       <aside className="space-y-7">
         {(() => {
           const link = resolveWhatsappLink(
@@ -139,13 +142,15 @@ export function SettingsSection() {
           if (!link) return null;
           return (
             <div className="sheet-deed p-7">
-              <p className="eyebrow mb-2">رابط الواتساب الخاص بيك</p>
-              <p className="font-[family-name:var(--font-body)] italic text-[0.95rem] text-[color:var(--color-ink-soft)] mb-4">
-                انشره في إعلاناتك. كل عميل يفتحه يوصل لمكتبك مباشرة.
+              <span className="eyebrow mb-2 block">
+                {t("dashboard.settings.magicLinkEyebrow")}
+              </span>
+              <p className="font-[family-name:var(--font-body)] text-[0.92rem] text-[color:var(--color-fg-secondary)] mb-4 leading-relaxed">
+                {t("dashboard.settings.magicLinkBody")}
               </p>
-              <div className="border-y border-[color:var(--color-rule-strong)] py-4 my-4">
+              <div className="rounded-[var(--radius-sm)] border border-[color:var(--color-border-subtle)] bg-[color:var(--color-bg-canvas)] p-3.5 my-4">
                 <p
-                  className="font-[family-name:var(--font-mono)] text-[0.92rem] text-[color:var(--color-ink)] break-all leading-relaxed"
+                  className="font-[family-name:var(--font-mono)] text-[0.88rem] text-[color:var(--color-fg-primary)] break-all leading-relaxed"
                   dir="ltr"
                 >
                   {link}
@@ -156,20 +161,20 @@ export function SettingsSection() {
                   type="button"
                   onClick={async () => {
                     const ok = await copyToClipboard(link);
-                    if (ok) toast.success("الرابط اتنسخ");
-                    else toast.error("ما اتنسخش");
+                    if (ok) toast.success(t("dashboard.settings.copyOk"));
+                    else toast.error(t("dashboard.settings.copyFailed"));
                   }}
-                  className="font-[family-name:var(--font-serif)] text-[0.85rem] tracking-[0.04em] uppercase text-[color:var(--color-ink-faint)] hover:text-[color:var(--color-brick)] transition-colors"
+                  className="font-[family-name:var(--font-display)] text-[0.82rem] uppercase tracking-[0.05em] text-[color:var(--color-fg-tertiary)] hover:text-[color:var(--color-fg-brand)] transition-colors"
                 >
-                  نسخ الرابط
+                  {t("dashboard.settings.copyLink")}
                 </button>
                 <a
                   href={link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-[family-name:var(--font-serif)] text-[0.85rem] tracking-[0.04em] uppercase text-[color:var(--color-ink-faint)] hover:text-[color:var(--color-brick)] transition-colors"
+                  className="font-[family-name:var(--font-display)] text-[0.82rem] uppercase tracking-[0.05em] text-[color:var(--color-fg-tertiary)] hover:text-[color:var(--color-fg-brand)] transition-colors"
                 >
-                  افتح في واتساب ↗
+                  {t("dashboard.settings.openWhatsapp")}
                 </a>
               </div>
             </div>
@@ -178,15 +183,27 @@ export function SettingsSection() {
 
         {settings ? (
           <div className="sheet p-7">
-            <p className="eyebrow mb-3">معلومات الحساب</p>
-            <dl className="divide-y divide-[color:var(--color-rule)] -mx-1">
-              <MetaRow label="الباقة" value={settings.planTier ?? "starter"} />
+            <span className="eyebrow mb-3 block">
+              {t("dashboard.settings.accountInfo")}
+            </span>
+            <dl className="divide-y divide-[color:var(--color-border-subtle)] -mx-1">
               <MetaRow
-                label="الحالة"
-                value={settings.isActive ? "نشط" : "موقوف"}
+                label={t("dashboard.settings.plan")}
+                value={settings.planTier ?? "starter"}
+              />
+              <MetaRow
+                label={t("dashboard.settings.status")}
+                value={
+                  settings.isActive
+                    ? t("dashboard.settings.active")
+                    : t("dashboard.settings.suspended")
+                }
               />
               {settings.id ? (
-                <MetaRow label="رقم الوسيط" value={`#${settings.id}`} />
+                <MetaRow
+                  label={t("dashboard.settings.brokerId")}
+                  value={`#${settings.id}`}
+                />
               ) : null}
             </dl>
           </div>
@@ -200,7 +217,7 @@ function MetaRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-baseline justify-between gap-3 px-1 py-3">
       <dt className="eyebrow">{label}</dt>
-      <dd className="font-[family-name:var(--font-serif)] text-[0.95rem] text-[color:var(--color-ink)]">
+      <dd className="font-[family-name:var(--font-body)] text-[0.92rem] text-[color:var(--color-fg-primary)]">
         {value}
       </dd>
     </div>
