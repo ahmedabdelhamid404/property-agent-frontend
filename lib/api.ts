@@ -92,6 +92,8 @@ export const apiPublic = {
   call: (path: string, opts?: CallOptions) => call(path, {}, opts),
   signup: (body: SignupBody) =>
     call("/api/tenants/signup", {}, { method: "POST", body }) as Promise<SignupResponse>,
+  login: (body: LoginBody) =>
+    call("/api/tenants/login", {}, { method: "POST", body }) as Promise<LoginResponse>,
 };
 
 /* ─── Broker (X-Tenant-Key) ─────────────────────────────────── */
@@ -183,6 +185,7 @@ export interface SignupBody {
   businessName: string;
   brokerEmail: string;
   brokerPhone: string;
+  password: string;
   notificationChannel: NotificationChannel;
 }
 
@@ -193,6 +196,19 @@ export interface SignupResponse {
   whatsappLink: string | null;
   magicLinkInstructions: string;
   notes: string;
+}
+
+export interface LoginBody {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  tenantId: number;
+  apiKey: string;
+  businessName: string;
+  magicCode: string | null;
+  whatsappLink: string | null;
 }
 
 export interface BrokerSettings {

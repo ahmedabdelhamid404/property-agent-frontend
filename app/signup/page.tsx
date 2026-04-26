@@ -16,17 +16,24 @@ import { broker } from "@/lib/storage";
 import { copyToClipboard } from "@/lib/utils";
 import { resolveWhatsappLink } from "@/lib/whatsapp";
 
-const schema = z.object({
-  businessName: z
-    .string()
-    .min(2, "الاسم قصير جداً")
-    .max(120, "الاسم طويل جداً"),
-  brokerEmail: z.string().email("الإيميل غير صحيح"),
-  brokerPhone: z
-    .string()
-    .regex(/^\+?\d{8,15}$/, "رقم بصيغة E.164 (+201xxxxxxxxx)"),
-  notificationChannel: z.enum(["Email", "WhatsApp", "Both"]),
-});
+const schema = z
+  .object({
+    businessName: z
+      .string()
+      .min(2, "الاسم قصير جداً")
+      .max(120, "الاسم طويل جداً"),
+    brokerEmail: z.string().email("الإيميل غير صحيح"),
+    brokerPhone: z
+      .string()
+      .regex(/^\+?\d{8,15}$/, "رقم بصيغة E.164 (+201xxxxxxxxx)"),
+    password: z.string().min(8, "8 خانات على الأقل"),
+    confirmPassword: z.string(),
+    notificationChannel: z.enum(["Email", "WhatsApp", "Both"]),
+  })
+  .refine((d) => d.password === d.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "كلمتا المرور غير متطابقتين",
+  });
 
 type FormData = z.infer<typeof schema>;
 
@@ -50,7 +57,10 @@ export default function SignupPage() {
 
   async function onSubmit(values: FormData) {
     try {
-      const r = await apiPublic.signup(values);
+      // confirmPassword is form-only — backend never sees it.
+      const { confirmPassword: _confirm, ...payload } = values;
+      void _confirm;
+      const r = await apiPublic.signup(payload);
       broker.setKey(r.apiKey);
       broker.setProfile(r.tenantId, values.businessName);
       setResult(r);
@@ -143,6 +153,24 @@ export default function SignupPage() {
                   error={errors.brokerPhone?.message}
                   dir="ltr"
                   {...register("brokerPhone")}
+                />
+                <Input
+                  type="password"
+                  label="كلمة المرور"
+                  placeholder="8 خانات على الأقل"
+                  helper="هتستخدمها مع الإيميل عشان تدخل لوحتك."
+                  autoComplete="new-password"
+                  dir="ltr"
+                  error={errors.password?.message}
+                  {...register("password")}
+                />
+                <Input
+                  type="password"
+                  label="تأكيد كلمة المرور"
+                  autoComplete="new-password"
+                  dir="ltr"
+                  error={errors.confirmPassword?.message}
+                  {...register("confirmPassword")}
                 />
                 <Select
                   label="قناة التنبيه المفضلة"
