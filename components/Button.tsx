@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import { forwardRef, type ButtonHTMLAttributes } from "react";
 
-type Variant = "primary" | "secondary" | "ghost" | "destructive";
+type Variant = "primary" | "secondary" | "ghost" | "accent" | "destructive";
 type Size = "sm" | "md" | "lg";
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -13,32 +13,37 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const base =
-  "inline-flex items-center justify-center gap-2 font-[family-name:var(--font-serif)] " +
-  "transition-[background,color,border-color,box-shadow] duration-200 " +
+  "inline-flex items-center justify-center gap-2 font-[family-name:var(--font-display)] font-medium " +
+  "transition-[background,color,border-color,box-shadow,transform] duration-200 " +
   "disabled:opacity-50 disabled:cursor-not-allowed " +
-  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--color-brick)]";
+  "active:translate-y-px " +
+  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--color-focus-ring)]";
 
 const variants: Record<Variant, string> = {
   primary:
-    "bg-[color:var(--color-ink)] text-[color:var(--color-paper-cream)] " +
-    "hover:bg-[color:var(--color-brick-deep)] " +
-    "shadow-[var(--shadow-leaf)]",
+    "bg-[color:var(--color-bg-brand)] text-[color:var(--color-fg-inverse)] " +
+    "hover:bg-[color:var(--color-bg-brand-hover)] " +
+    "shadow-[var(--shadow-subtle)] hover:shadow-[var(--shadow-card)]",
   secondary:
-    "bg-[color:var(--color-paper-cream)] text-[color:var(--color-ink)] " +
-    "border border-[color:var(--color-rule-strong)] " +
-    "hover:border-[color:var(--color-ink)] hover:bg-[color:var(--color-vellum)]",
+    "bg-[color:var(--color-bg-surface)] text-[color:var(--color-fg-primary)] " +
+    "border border-[color:var(--color-border-subtle)] " +
+    "hover:border-[color:var(--color-border-default)] hover:bg-[color:var(--color-bg-sunken)]",
   ghost:
-    "bg-transparent text-[color:var(--color-ink)] " +
-    "hover:bg-[color:var(--color-brick-tint)]",
+    "bg-transparent text-[color:var(--color-fg-secondary)] " +
+    "hover:bg-[color:var(--color-bg-sunken)] hover:text-[color:var(--color-fg-primary)]",
+  accent:
+    "bg-[color:var(--color-bg-accent)] text-[color:var(--color-neutral-900)] " +
+    "hover:brightness-95 " +
+    "shadow-[var(--shadow-subtle)]",
   destructive:
-    "bg-[color:var(--color-err)] text-[color:var(--color-paper-cream)] " +
+    "bg-[color:var(--color-error)] text-[color:var(--color-fg-inverse)] " +
     "hover:opacity-90",
 };
 
 const sizes: Record<Size, string> = {
-  sm: "h-9 px-3.5 text-[0.85rem] rounded-[var(--radius-xs)]",
-  md: "h-11 px-5 text-[0.95rem] rounded-[var(--radius-sm)]",
-  lg: "h-13 px-7 text-[1.05rem] rounded-[var(--radius-sm)]",
+  sm: "h-9 px-4 text-[0.85rem] rounded-full",
+  md: "h-11 px-5 text-[0.95rem] rounded-full",
+  lg: "h-13 px-7 text-[1.05rem] rounded-full",
 };
 
 export const Button = forwardRef<HTMLButtonElement, Props>(function Button(

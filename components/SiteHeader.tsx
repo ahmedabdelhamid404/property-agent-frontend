@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Logo } from "./Logo";
+import { LanguageToggle } from "./LanguageToggle";
+import { useI18n } from "./I18nProvider";
 import { broker } from "@/lib/storage";
 
 interface Props {
@@ -11,18 +13,13 @@ interface Props {
   showBrokerSession?: boolean;
 }
 
-const ALL_LINKS = [
-  { href: "/", label: "الرئيسية", authedOnly: false, unauthedOnly: false },
-  { href: "/login", label: "سجّل الدخول", authedOnly: false, unauthedOnly: true },
-  { href: "/signup", label: "سجّل وسيط", authedOnly: false, unauthedOnly: true },
-];
-
 export function SiteHeader({ showBrokerSession }: Props) {
   const pathname = usePathname();
   const router = useRouter();
-  const [authed, setAuthed] = useState<boolean>(false);
+  const { t } = useI18n();
+  const [authed, setAuthed] = useState(false);
   const [name, setName] = useState<string | null>(null);
-  const [hydrated, setHydrated] = useState<boolean>(false);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     const has = !!broker.getKey();
@@ -31,102 +28,110 @@ export function SiteHeader({ showBrokerSession }: Props) {
     setHydrated(true);
   }, [showBrokerSession, pathname]);
 
-  const visibleLinks = ALL_LINKS.filter((l) => {
-    if (!hydrated) return !l.authedOnly && !l.unauthedOnly;
-    if (authed) return !l.unauthedOnly;
-    return !l.authedOnly;
-  });
-
   function signOut() {
     broker.clear();
     router.push("/");
   }
 
+  const links = [
+    { href: "/", label: t("nav.home"), authedOnly: false, unauthedOnly: false },
+    { href: "/login", label: t("nav.login"), authedOnly: false, unauthedOnly: true },
+    { href: "/signup", label: t("nav.signup"), authedOnly: false, unauthedOnly: true },
+  ];
+
+  const visibleLinks = links.filter((l) => {
+    if (!hydrated) return !l.authedOnly && !l.unauthedOnly;
+    if (authed) return !l.unauthedOnly;
+    return !l.authedOnly;
+  });
+
   return (
-    <header className="border-b border-[color:var(--color-rule)] bg-[color:var(--color-vellum)]/70 backdrop-blur-[2px]">
-      <div className="deck flex items-center justify-between gap-6 py-4">
+    <header className="sticky top-0 z-30 border-b border-[color:var(--color-border-subtle)] bg-[color:var(--color-bg-surface)]/80 backdrop-blur-md">
+      <div className="deck flex items-center justify-between gap-4 py-4">
         <Link href="/" className="shrink-0" aria-label="Property-Agent home">
           <Logo />
         </Link>
-        <nav className="hidden md:flex items-center gap-7" aria-label="Primary">
+
+        <nav
+          className="hidden md:flex items-center gap-1"
+          aria-label="Primary"
+        >
           {visibleLinks.map((l) => {
             const active = pathname === l.href;
             return (
               <Link
                 key={l.href}
                 href={l.href}
-                className="group flex flex-col items-center gap-0.5 leading-tight"
+                className={
+                  "px-4 py-2 rounded-full text-[0.92rem] font-medium transition-colors duration-200 " +
+                  "font-[family-name:var(--font-display)] " +
+                  (active
+                    ? "bg-[color:var(--color-bg-brand-soft)] text-[color:var(--color-fg-brand)]"
+                    : "text-[color:var(--color-fg-secondary)] hover:bg-[color:var(--color-bg-sunken)] hover:text-[color:var(--color-fg-primary)]")
+                }
               >
-                <span
-                  className={
-                    "font-[family-name:var(--font-display)] text-[1rem] " +
-                    (active
-                      ? "text-[color:var(--color-brick)]"
-                      : "text-[color:var(--color-ink)] group-hover:text-[color:var(--color-brick)]")
-                  }
-                >
-                  {l.label}
-                </span>
-                <span
-                  className={
-                    "h-px w-full transition-colors duration-200 " +
-                    (active
-                      ? "bg-[color:var(--color-brick)]"
-                      : "bg-transparent group-hover:bg-[color:var(--color-rule-strong)]")
-                  }
-                />
+                {l.label}
               </Link>
             );
           })}
         </nav>
 
-        {/* Right rail — sign-out (authed) or sign-up CTA (unauthed). */}
-        {hydrated && authed ? (
-          <div className="flex items-center gap-3 ms-auto md:ms-0">
-            {showBrokerSession && name ? (
-              <span className="hidden sm:block font-[family-name:var(--font-body)] text-[0.92rem] text-[color:var(--color-ink-soft)] truncate max-w-[200px]">
-                {name}
-              </span>
-            ) : null}
-            <button
-              type="button"
-              onClick={signOut}
-              aria-label="تسجيل الخروج"
+        <div className="flex items-center gap-2 ms-auto md:ms-0">
+          <LanguageToggle />
+
+          {hydrated && authed ? (
+            <>
+              {showBrokerSession && name ? (
+                <span className="hidden lg:block font-[family-name:var(--font-body)] text-[0.88rem] text-[color:var(--color-fg-secondary)] truncate max-w-[180px] ms-2">
+                  {name}
+                </span>
+              ) : null}
+              <button
+                type="button"
+                onClick={signOut}
+                aria-label={t("nav.signOut")}
+                className={
+                  "inline-flex items-center gap-2 h-9 px-3.5 rounded-full " +
+                  "border border-[color:var(--color-border-subtle)] " +
+                  "bg-[color:var(--color-bg-surface)] " +
+                  "font-[family-name:var(--font-display)] text-[0.85rem] font-medium " +
+                  "text-[color:var(--color-fg-primary)] " +
+                  "hover:border-[color:var(--color-border-default)] hover:text-[color:var(--color-fg-brand)] " +
+                  "transition-colors"
+                }
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="size-4"
+                  aria-hidden
+                >
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                  <polyline points="16 17 21 12 16 7" />
+                  <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
+                <span className="hidden sm:inline">{t("nav.signOut")}</span>
+              </button>
+            </>
+          ) : hydrated ? (
+            <Link
+              href="/signup"
               className={
-                "inline-flex items-center gap-2 h-9 px-3.5 rounded-[var(--radius-xs)] " +
-                "bg-[color:var(--color-paper-cream)] " +
-                "border border-[color:var(--color-rule-strong)] " +
-                "font-[family-name:var(--font-display)] text-[0.85rem] " +
-                "text-[color:var(--color-ink)] " +
-                "hover:border-[color:var(--color-brick)] hover:text-[color:var(--color-brick)] " +
-                "transition-colors"
+                "hidden sm:inline-flex items-center h-9 px-4 rounded-full " +
+                "bg-[color:var(--color-bg-brand)] text-[color:var(--color-fg-inverse)] " +
+                "font-[family-name:var(--font-display)] text-[0.88rem] font-medium " +
+                "hover:bg-[color:var(--color-bg-brand-hover)] " +
+                "transition-colors shadow-[var(--shadow-subtle)]"
               }
             >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="size-4"
-                aria-hidden
-              >
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                <polyline points="16 17 21 12 16 7" />
-                <line x1="21" y1="12" x2="9" y2="12" />
-              </svg>
-              <span>خروج</span>
-            </button>
-          </div>
-        ) : (
-          <Link
-            href="/signup"
-            className="hidden md:inline-flex items-center gap-2 font-[family-name:var(--font-serif)] text-[0.92rem] text-[color:var(--color-ink)] linkish"
-          >
-            ابدأ مجاناً
-          </Link>
-        )}
+              {t("nav.getStarted")}
+            </Link>
+          ) : null}
+        </div>
       </div>
     </header>
   );

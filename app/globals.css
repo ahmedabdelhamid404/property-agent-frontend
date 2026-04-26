@@ -1,56 +1,137 @@
 @import "tailwindcss";
 
 /* ────────────────────────────────────────────────────────────────
-   Soft Oasis — calm, modern, generous. Off-white surfaces, sage
-   primary, clay secondary. Single-layer shadows. Rounded but not
-   bubbly. Inter + Geist for English, IBM Plex Sans Arabic for ar.
+   Khaleeji Fintech — Property-Agent v2
+   Inspired by Tabby + Hala. Deep teal primary, Khaleeji gold
+   accent, Tabby-mint highlight. Clean white + cool off-white
+   surfaces. Bilingual EN/AR. Soft layered shadows. Rounded but
+   disciplined.
+
+   Legacy variable names (--color-brick / --color-teal / etc.) are
+   kept and remapped to new palette so older components inherit
+   the new theme without code edits.
    ──────────────────────────────────────────────────────────────── */
 
 @theme {
-  /* Surfaces */
-  --color-paper:        #fafaf7;       /* page background */
-  --color-paper-cream:  #ffffff;       /* card surface */
-  --color-paper-shade:  #f3f1ec;       /* skeleton base / hover */
-  --color-paper-deep:   #ebe9e3;       /* slight pressed-down tone */
-  --color-vellum:       #fbfaf6;       /* section bands */
+  /* ═══ NEW PALETTE — primitives ════════════════════════════════ */
+  /* Brand teal */
+  --color-teal-50:  #e6f0f0;
+  --color-teal-100: #c2dada;
+  --color-teal-200: #8db8b8;
+  --color-teal-300: #5a9595;
+  --color-teal-400: #2c7474;
+  --color-teal-500: #155757;
+  --color-teal-600: #0d4a4a;   /* PRIMARY */
+  --color-teal-700: #0a3a3a;   /* hover/pressed */
+  --color-teal-800: #072a2a;
+  --color-teal-900: #031818;
 
-  /* Ink hierarchy — true charcoal, no warm tint */
-  --color-ink:          #1c1c1c;
-  --color-ink-soft:     #404040;
-  --color-ink-faint:    #737373;
-  --color-ink-mute:     #a3a3a3;
+  /* Khaleeji gold accent */
+  --color-gold-50:  #fbf6e9;
+  --color-gold-100: #f4e8c4;
+  --color-gold-200: #e9d499;
+  --color-gold-300: #dcbf6f;
+  --color-gold-400: #cfac4f;
+  --color-gold-500: #c8a35a;   /* ACCENT */
+  --color-gold-600: #a8873d;
+  --color-gold-700: #7e6428;
+  --color-gold-800: #564317;
+  --color-gold-900: #332708;
 
-  /* Hairlines — barely-there warm gray */
-  --color-rule:         #ebe9e3;
-  --color-rule-strong:  #d4d1c8;
-  --color-rule-soft:    #f3f1ec;
+  /* Tabby-style mint highlight */
+  --color-mint-50:  #eef9f3;
+  --color-mint-100: #d4f0e1;
+  --color-mint-200: #a8e6c5;   /* HIGHLIGHT */
+  --color-mint-300: #7cd9a8;
+  --color-mint-400: #4caf7d;
+  --color-mint-500: #2e8a5e;
 
-  /* Accents — sage primary, clay secondary */
-  --color-brick:        #7a8b6e;       /* sage (kept legacy name) */
-  --color-brick-deep:   #5e6e54;
-  --color-brick-tint:   rgba(122, 139, 110, 0.10);
-  --color-teal:         #c4866b;       /* clay (legacy name kept) */
-  --color-teal-tint:    rgba(196, 134, 107, 0.12);
-  --color-gold:         #b88848;
-  --color-gold-tint:    rgba(184, 136, 72, 0.12);
+  /* Neutrals — cool, slightly green-tinted gray */
+  --color-neutral-0:   #ffffff;
+  --color-neutral-50:  #fafbfa;
+  --color-neutral-100: #f3f5f4;
+  --color-neutral-200: #e8eae8;
+  --color-neutral-300: #d4d8d6;
+  --color-neutral-400: #9aa6a6;
+  --color-neutral-500: #6e7c7c;
+  --color-neutral-600: #5b6b6b;
+  --color-neutral-700: #3b4b4b;
+  --color-neutral-800: #1f2c2c;
+  --color-neutral-900: #0e1a1a;
 
-  /* Status semantics */
-  --color-ok:           #5e8b5a;
-  --color-warn:         #b88848;
-  --color-err:          #c2554c;
-  --color-ok-tint:      rgba(94, 139, 90, 0.12);
-  --color-warn-tint:    rgba(184, 136, 72, 0.12);
-  --color-err-tint:     rgba(194, 85, 76, 0.10);
+  /* ═══ SEMANTIC TOKENS (preferred for new code) ═══════════════ */
+  --color-bg-canvas:      var(--color-neutral-50);
+  --color-bg-surface:     var(--color-neutral-0);
+  --color-bg-sunken:      var(--color-neutral-100);
+  --color-bg-brand:       var(--color-teal-600);
+  --color-bg-brand-hover: var(--color-teal-700);
+  --color-bg-brand-soft:  var(--color-teal-50);
+  --color-bg-accent:      var(--color-gold-500);
+  --color-bg-accent-soft: var(--color-gold-100);
+  --color-bg-highlight:   var(--color-mint-200);
+  --color-bg-inverse:     var(--color-neutral-900);
 
-  /* Type — modern sans, IBM Plex Sans Arabic for ar fallback */
-  --font-display:  var(--font-geist),         "Geist",              "IBM Plex Sans Arabic", "Inter", system-ui, sans-serif;
+  --color-fg-primary:   var(--color-neutral-900);
+  --color-fg-secondary: var(--color-neutral-600);
+  --color-fg-tertiary:  var(--color-neutral-500);
+  --color-fg-disabled:  var(--color-neutral-400);
+  --color-fg-inverse:   var(--color-neutral-0);
+  --color-fg-brand:     var(--color-teal-600);
+  --color-fg-accent:    var(--color-gold-700);
+
+  --color-border-subtle:  var(--color-neutral-200);
+  --color-border-default: var(--color-neutral-300);
+  --color-border-strong:  var(--color-neutral-600);
+  --color-border-brand:   var(--color-teal-600);
+
+  --color-success: var(--color-mint-400);
+  --color-warn:    #d49a3a;
+  --color-error:   #c2554c;
+  --color-info:    #3a7ea8;
+
+  --color-focus-ring: var(--color-gold-400);
+
+  /* ═══ LEGACY ALIASES (existing components keep working) ═══════ */
+  --color-paper:        var(--color-neutral-50);
+  --color-paper-cream:  var(--color-neutral-0);
+  --color-paper-shade:  var(--color-neutral-100);
+  --color-paper-deep:   var(--color-neutral-200);
+  --color-vellum:       var(--color-neutral-50);
+
+  --color-ink:        var(--color-neutral-900);
+  --color-ink-soft:   var(--color-neutral-700);
+  --color-ink-faint:  var(--color-neutral-500);
+  --color-ink-mute:   var(--color-neutral-400);
+
+  --color-rule:        var(--color-neutral-200);
+  --color-rule-strong: var(--color-neutral-300);
+  --color-rule-soft:   var(--color-neutral-100);
+
+  --color-brick:       var(--color-teal-600);     /* primary brand */
+  --color-brick-deep:  var(--color-teal-700);
+  --color-brick-tint:  rgba(13, 74, 74, 0.10);
+  --color-teal:        var(--color-gold-500);     /* legacy "secondary" → gold */
+  --color-teal-tint:   rgba(200, 163, 90, 0.14);
+  --color-gold:        var(--color-gold-600);
+  --color-gold-tint:   rgba(168, 135, 61, 0.12);
+
+  --color-ok:        var(--color-mint-400);
+  --color-ok-tint:   rgba(76, 175, 125, 0.14);
+  --color-warn-tint: rgba(212, 154, 58, 0.14);
+  --color-err:       #c2554c;
+  --color-err-tint:  rgba(194, 85, 76, 0.10);
+
+  /* ═══ TYPOGRAPHY ════════════════════════════════════════════ */
+  /* Inter is primary UI, IBM Plex Sans Arabic is the Arabic
+     companion, Source Serif 4 is for editorial accents. */
+  --font-display:  var(--font-inter),         "Inter",              "IBM Plex Sans Arabic", system-ui, sans-serif;
   --font-body:     var(--font-inter),         "Inter",              "IBM Plex Sans Arabic", system-ui, sans-serif;
-  --font-serif:    var(--font-inter),         "Inter",              "IBM Plex Sans Arabic", system-ui, sans-serif;
+  --font-serif:    var(--font-source-serif),  "Source Serif 4",     "Source Serif Pro",    "Georgia", serif;
   --font-mono:     var(--font-geist-mono),    "Geist Mono",         "JetBrains Mono",      "SFMono-Regular", monospace;
   --font-quote:    var(--font-source-serif),  "Source Serif 4",     "Source Serif Pro",    "Georgia", serif;
   --font-arabic:   var(--font-plex-arabic),   "IBM Plex Sans Arabic","Tajawal",            system-ui, sans-serif;
 
-  /* Scale — modern, balanced */
+  /* Modular scale — modern, fintech-confident */
   --text-xs:    0.78rem;
   --text-sm:    0.88rem;
   --text-base:  1rem;
@@ -61,24 +142,32 @@
   --text-4xl:   3.2rem;
   --text-5xl:   4.4rem;
 
-  /* Shadows — soft single-layer */
-  --shadow-leaf:  0 1px 2px rgba(28, 28, 28, 0.04), 0 1px 3px rgba(28, 28, 28, 0.05);
-  --shadow-card:  0 2px 8px rgba(28, 28, 28, 0.04), 0 4px 16px rgba(28, 28, 28, 0.05);
-  --shadow-deed:  0 8px 24px rgba(28, 28, 28, 0.06), 0 2px 6px rgba(28, 28, 28, 0.04);
+  /* ═══ SHADOWS ═══════════════════════════════════════════════ */
+  --shadow-subtle:  0 1px 2px rgba(13, 74, 74, 0.04), 0 1px 3px rgba(13, 74, 74, 0.05);
+  --shadow-card:    0 2px 6px rgba(13, 74, 74, 0.06), 0 4px 12px rgba(13, 74, 74, 0.05);
+  --shadow-raised:  0 4px 10px rgba(13, 74, 74, 0.07), 0 10px 24px rgba(13, 74, 74, 0.07);
+  --shadow-hero:    0 8px 18px rgba(13, 74, 74, 0.10), 0 20px 40px rgba(13, 74, 74, 0.10);
+  --shadow-focus:   0 0 0 3px rgba(207, 172, 79, 0.45);
 
-  /* Radius — rounded modern */
-  --radius-xs: 8px;
-  --radius-sm: 12px;
-  --radius-md: 16px;
-  --radius-lg: 20px;
+  /* Legacy shadow names */
+  --shadow-leaf: var(--shadow-subtle);
+  --shadow-deed: var(--shadow-raised);
+
+  /* ═══ RADII ═════════════════════════════════════════════════ */
+  --radius-xs:   8px;
+  --radius-sm:   12px;
+  --radius-md:   16px;
+  --radius-lg:   20px;
+  --radius-xl:   28px;
+  --radius-full: 999px;
 }
 
 /* ────────────────────────────────────────────────────────────────
    Page chrome
    ──────────────────────────────────────────────────────────────── */
 html, body {
-  background: var(--color-paper);
-  color: var(--color-ink);
+  background: var(--color-bg-canvas);
+  color: var(--color-fg-primary);
   font-family: var(--font-body);
   font-feature-settings: "cv11", "ss01";
   -webkit-font-smoothing: antialiased;
@@ -86,20 +175,20 @@ html, body {
   text-rendering: optimizeLegibility;
 }
 
-/* RTL by default, ar text uses Plex Arabic */
+body { min-height: 100dvh; }
+
+/* RTL — Arabic uses Plex Arabic */
 html[dir="rtl"] body {
-  direction: rtl;
   font-family: var(--font-arabic);
 }
 
-body { min-height: 100dvh; }
-
-/* Headings — Geist for English, Plex Arabic on RTL */
+/* Headings — Inter for English, Plex Arabic for Arabic */
 h1, h2, h3, h4 {
   font-family: var(--font-display);
   font-weight: 600;
-  line-height: 1.15;
-  letter-spacing: -0.015em;
+  line-height: 1.12;
+  letter-spacing: -0.018em;
+  color: var(--color-fg-primary);
 }
 html[dir="rtl"] h1,
 html[dir="rtl"] h2,
@@ -125,19 +214,19 @@ table tbody td.num,
 .lining { font-variant-numeric: lining-nums tabular-nums; }
 
 ::selection {
-  background: var(--color-brick-tint);
-  color: var(--color-ink);
+  background: var(--color-bg-brand-soft);
+  color: var(--color-fg-brand);
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-brick);
+  outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;
   border-radius: var(--radius-xs);
 }
 
-.rule        { border-color: var(--color-rule); }
-.rule-strong { border-color: var(--color-rule-strong); }
-.rule-soft   { border-color: var(--color-rule-soft); }
+.rule        { border-color: var(--color-border-subtle); }
+.rule-strong { border-color: var(--color-border-default); }
+.rule-soft   { border-color: var(--color-neutral-100); }
 
 /* Container — generous reading width */
 .deck {
@@ -154,16 +243,16 @@ table tbody td.num,
 
 /* Card — clean white surface, soft shadow, generous radius */
 .sheet {
-  background: var(--color-paper-cream);
-  border: 1px solid var(--color-rule);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-leaf);
+  box-shadow: var(--shadow-subtle);
 }
 
-/* Accent card — slightly more lift, sage→clay gradient bar at top */
+/* Accent card — slightly more lift, teal→gold gradient bar at top */
 .sheet-deed {
-  background: var(--color-paper-cream);
-  border: 1px solid var(--color-rule);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-card);
   position: relative;
@@ -175,7 +264,7 @@ table tbody td.num,
   inset-block-start: 0;
   inset-inline: 0;
   height: 3px;
-  background: linear-gradient(90deg, var(--color-brick), var(--color-teal));
+  background: linear-gradient(90deg, var(--color-bg-brand), var(--color-bg-accent));
 }
 
 /* Display number — for stat cards */
@@ -186,60 +275,92 @@ table tbody td.num,
   letter-spacing: -0.025em;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
+  color: var(--color-fg-primary);
 }
 
 /* Eyebrow — quiet uppercase label */
 .eyebrow {
   font-family: var(--font-display);
   font-size: 0.72rem;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-ink-faint);
+  color: var(--color-fg-brand);
 }
 
 /* Linkish — subtle underline on hover */
 .linkish {
-  color: var(--color-ink);
+  color: var(--color-fg-primary);
   border-bottom: 1px solid transparent;
   padding-bottom: 1px;
   transition: border-color 180ms ease, color 180ms ease;
 }
 .linkish:hover {
-  color: var(--color-brick);
-  border-bottom-color: var(--color-brick);
+  color: var(--color-fg-brand);
+  border-bottom-color: var(--color-fg-brand);
+}
+
+/* Pill button — Tabby-style */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-inline: 1rem;
+  padding-block: 0.4rem;
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  font-weight: 500;
+  background: var(--color-bg-brand-soft);
+  color: var(--color-fg-brand);
 }
 
 /* Page-load reveal — quick, springy */
 @keyframes oasis-rise {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.rise-1 { animation: oasis-rise 380ms cubic-bezier(0.2, 0.8, 0.2, 1) 60ms both; }
-.rise-2 { animation: oasis-rise 380ms cubic-bezier(0.2, 0.8, 0.2, 1) 140ms both; }
-.rise-3 { animation: oasis-rise 380ms cubic-bezier(0.2, 0.8, 0.2, 1) 220ms both; }
-.rise-4 { animation: oasis-rise 380ms cubic-bezier(0.2, 0.8, 0.2, 1) 300ms both; }
+.rise-1 { animation: oasis-rise 420ms cubic-bezier(0.2, 0.8, 0.2, 1) 60ms both; }
+.rise-2 { animation: oasis-rise 420ms cubic-bezier(0.2, 0.8, 0.2, 1) 140ms both; }
+.rise-3 { animation: oasis-rise 420ms cubic-bezier(0.2, 0.8, 0.2, 1) 220ms both; }
+.rise-4 { animation: oasis-rise 420ms cubic-bezier(0.2, 0.8, 0.2, 1) 300ms both; }
 
-.row-hover:hover { background: rgba(28, 28, 28, 0.025); }
+.row-hover:hover { background: var(--color-neutral-50); }
 
 @keyframes oasis-shimmer {
-  0%   { background-position:  -200% 0; }
-  100% { background-position:   200% 0; }
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
 }
 .skeleton {
   background: linear-gradient(
     100deg,
-    var(--color-paper-shade) 30%,
-    var(--color-paper-cream) 50%,
-    var(--color-paper-shade) 70%
+    var(--color-neutral-100) 30%,
+    var(--color-neutral-0) 50%,
+    var(--color-neutral-100) 70%
   );
   background-size: 200% 100%;
   animation: oasis-shimmer 1.4s ease-in-out infinite;
   border-radius: var(--radius-sm);
 }
 
+/* Brand glow — used behind hero shapes */
+.brand-glow {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(13, 74, 74, 0.08) 0%,
+    transparent 70%
+  );
+}
+
+/* Soft gradient backdrop */
+.gradient-mesh {
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 0%, rgba(13, 74, 74, 0.08), transparent 70%),
+    radial-gradient(ellipse 60% 50% at 80% 100%, rgba(200, 163, 90, 0.10), transparent 70%),
+    var(--color-bg-canvas);
+}
+
 /* Scrollbar — minimal */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-thumb { background: var(--color-rule-strong); border-radius: 999px; border: 2px solid var(--color-paper); }
-::-webkit-scrollbar-thumb:hover { background: var(--color-ink-faint); }
+::-webkit-scrollbar-thumb { background: var(--color-neutral-300); border-radius: 999px; border: 2px solid var(--color-bg-canvas); }
+::-webkit-scrollbar-thumb:hover { background: var(--color-neutral-500); }
 ::-webkit-scrollbar-track { background: transparent; }
