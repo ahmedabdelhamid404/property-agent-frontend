@@ -138,22 +138,39 @@ export function SettingsSection() {
             </p>
             <div className="border-y border-[color:var(--color-rule-strong)] py-4 my-4">
               <p
-                className="font-[family-name:var(--font-mono)] text-[0.95rem] text-[color:var(--color-ink)] break-all leading-relaxed"
+                className="font-[family-name:var(--font-mono)] text-[0.92rem] text-[color:var(--color-ink)] break-all leading-relaxed"
                 dir="ltr"
               >
-                wa.me/{"<your-business>"}?text=BR-{settings.magicCode}
+                {settings.whatsappLink ?? `BR-${settings.magicCode}`}
               </p>
             </div>
-            <button
-              type="button"
-              onClick={async () => {
-                const ok = await copyToClipboard(`BR-${settings!.magicCode}`);
-                if (ok) toast.success("الكود اتنسخ");
-              }}
-              className="font-[family-name:var(--font-serif)] text-[0.85rem] tracking-[0.04em] uppercase text-[color:var(--color-ink-faint)] hover:text-[color:var(--color-brick)] transition-colors"
-            >
-              نسخ الكود
-            </button>
+            <div className="flex items-center gap-5">
+              <button
+                type="button"
+                onClick={async () => {
+                  const target =
+                    settings.whatsappLink ?? `BR-${settings.magicCode}`;
+                  const ok = await copyToClipboard(target);
+                  if (ok)
+                    toast.success(
+                      settings.whatsappLink ? "الرابط اتنسخ" : "الكود اتنسخ",
+                    );
+                }}
+                className="font-[family-name:var(--font-serif)] text-[0.85rem] tracking-[0.04em] uppercase text-[color:var(--color-ink-faint)] hover:text-[color:var(--color-brick)] transition-colors"
+              >
+                {settings.whatsappLink ? "نسخ الرابط" : "نسخ الكود"}
+              </button>
+              {settings.whatsappLink ? (
+                <a
+                  href={settings.whatsappLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-[family-name:var(--font-serif)] text-[0.85rem] tracking-[0.04em] uppercase text-[color:var(--color-ink-faint)] hover:text-[color:var(--color-brick)] transition-colors"
+                >
+                  افتح في واتساب ↗
+                </a>
+              ) : null}
+            </div>
           </div>
         ) : null}
 

@@ -218,6 +218,14 @@ function SuccessDeed({ data }: { data: SignupResponse }) {
           monospace
           helper="استخدمه في رابط الواتساب: BR-{code}"
         />
+        {data.whatsappLink ? (
+          <KeyValueRow
+            label="رابط الواتساب"
+            value={data.whatsappLink}
+            monospace
+            helper="Share with customers — they tap and arrive tagged to your office"
+          />
+        ) : null}
       </div>
 
       <div className="mt-8 pt-6 border-t border-[color:var(--color-rule-strong)]">
@@ -225,7 +233,9 @@ function SuccessDeed({ data }: { data: SignupResponse }) {
         <p
           className="font-[family-name:var(--font-body)] text-[0.95rem] leading-[1.55] text-[color:var(--color-ink-soft)] break-words"
         >
-          {data.magicLinkInstructions}
+          {data.whatsappLink
+            ? "انشر الرابط ده على الإعلانات والصفحات الرسمية. لما العميل يضغط عليه، يفتح واتساب على رقمنا، وبيوصلك مربوط باسمك تلقائياً."
+            : data.magicLinkInstructions}
         </p>
       </div>
 

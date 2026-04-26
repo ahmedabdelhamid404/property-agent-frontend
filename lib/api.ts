@@ -146,6 +146,7 @@ export interface SignupResponse {
   tenantId: number;
   apiKey: string;
   magicCode: string;
+  whatsappLink: string | null;
   magicLinkInstructions: string;
   notes: string;
 }
@@ -157,6 +158,7 @@ export interface BrokerSettings {
   brokerPhone: string | null;
   notificationChannel: NotificationChannel;
   magicCode?: string | null;
+  whatsappLink?: string | null;
   planTier?: string;
   isActive?: boolean;
   createdAt?: string;
