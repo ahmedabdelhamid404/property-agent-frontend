@@ -357,6 +357,29 @@ table tbody td.num,
   animation: oasis-float 3.6s ease-in-out infinite;
 }
 
+/* Chat-message reveal — fades up like a real chat bubble landing.
+   Each message sets its own --chat-i (0..N) and CSS computes the
+   stagger delay so the conversation unfolds sequentially. */
+@keyframes oasis-chat-pop {
+  0%   { opacity: 0; transform: translateY(10px) scale(0.96); }
+  60%  { opacity: 1; transform: translateY(-1px) scale(1.01); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.chat-pop {
+  animation: oasis-chat-pop 460ms cubic-bezier(0.34, 1.32, 0.64, 1)
+    calc(200ms + var(--chat-i, 0) * 260ms) both;
+}
+
+/* Hide the scrollbar inside the phone mockup chat so it scrolls but
+   never shows an OS scrollbar that breaks the mockup illusion. */
+.chat-scroll {
+  scrollbar-width: none;
+}
+.chat-scroll::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
 .row-hover:hover { background: var(--color-neutral-50); }
 
 @keyframes oasis-shimmer {

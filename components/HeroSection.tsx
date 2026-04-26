@@ -126,7 +126,7 @@ function PhotoCover() {
         zIndex: 0,
         backgroundImage: `url('${VILLA_PHOTO}')`,
         backgroundSize: "cover",
-        backgroundPosition: "75% 50%",
+        backgroundPosition: "20% 50%",
         backgroundRepeat: "no-repeat",
         WebkitMaskImage: mask,
         maskImage: mask,
@@ -171,7 +171,7 @@ function PhoneMockup() {
   const { t, locale } = useI18n();
   return (
     <div className="relative">
-      {/* Phone frame — taller than before */}
+      {/* Phone frame */}
       <div
         className="relative w-[300px] sm:w-[330px] lg:w-[360px] rounded-[44px] bg-[#0a1414] p-[10px] shadow-[var(--shadow-hero)]"
         style={{ aspectRatio: "9 / 19" }}
@@ -184,7 +184,10 @@ function PhoneMockup() {
 
         <div className="rounded-[36px] bg-[#e6f0ea] overflow-hidden h-full flex flex-col">
           {/* Status bar */}
-          <div className="flex items-center justify-between px-5 pt-3 pb-1.5 text-[#0a1414] text-[0.74rem] font-medium shrink-0" dir="ltr">
+          <div
+            className="flex items-center justify-between px-5 pt-3 pb-1.5 text-[#0a1414] text-[0.74rem] font-medium shrink-0"
+            dir="ltr"
+          >
             <span>9:41</span>
             <div className="flex items-center gap-1.5">
               <SignalIcon />
@@ -215,61 +218,64 @@ function PhoneMockup() {
             <DotsIcon />
           </div>
 
-          {/* Chat — fills the phone vertically. Faithful WhatsApp
-              cosmetics: TODAY date pill at top, message bubbles with
-              corner tails, blue ✓✓ read receipts on bot replies. */}
+          {/* Chat — scrollable so the whole arc is reachable, with the
+              scrollbar hidden for the mockup aesthetic. Faithful WhatsApp
+              cosmetics: TODAY date pill at top, bubble corner tails,
+              blue ✓✓ read receipts on bot replies. */}
           <div
-            className="grow overflow-hidden relative flex flex-col px-3 py-2.5 gap-1.5"
+            className="chat-scroll grow overflow-y-auto relative flex flex-col px-3 py-2.5 gap-1.5"
             style={{
               background:
                 "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23e6f0ea'/%3E%3Cg opacity='0.06'%3E%3Cpath d='M0 50h100M50 0v100' stroke='%230d4a4a' stroke-width='1'/%3E%3C/g%3E%3C/svg%3E\")",
             }}
             dir="rtl"
           >
-            <DateChip label={t("hero.mockup.today")} />
-            <Bubble side="me" time={t("hero.mockup.greetingTime")} read>
+            <DateChip label={t("hero.mockup.today")} index={0} />
+            <Bubble side="me" time={t("hero.mockup.greetingTime")} read index={1}>
               {t("hero.mockup.greeting")}
             </Bubble>
-            <Bubble side="them" time={t("hero.mockup.msg1Time")}>
+            <Bubble side="them" time={t("hero.mockup.msg1Time")} index={2}>
               {t("hero.mockup.msg1Customer")}
             </Bubble>
-            <Bubble side="me" time={t("hero.mockup.msg2Time")} read>
+            <Bubble side="me" time={t("hero.mockup.msg2Time")} read index={3}>
               {t("hero.mockup.msg2Bot")}
             </Bubble>
-            <Bubble side="them" time={t("hero.mockup.msg3Time")}>
-              {t("hero.mockup.msg3Customer")}
-            </Bubble>
             <ListingCard
+              index={4}
               title={t("hero.mockup.msg4ListingTitle")}
               area={t("hero.mockup.msg4ListingArea")}
               rooms={t("hero.mockup.msg4ListingRooms")}
               price={t("hero.mockup.msg4ListingPrice")}
               tag={t("hero.mockup.msg4ListingTag")}
             />
-            <Bubble side="me" time={t("hero.mockup.msg5Time")} read>
-              {t("hero.mockup.msg5Bot")}
-            </Bubble>
-            <Bubble side="them" time={t("hero.mockup.msg6Time")}>
+            <Bubble side="them" time={t("hero.mockup.msg6Time")} index={5}>
               {t("hero.mockup.msg6Customer")}
             </Bubble>
-            <Bubble side="me" time={t("hero.mockup.msg7Time")} read>
+            <Bubble side="me" time={t("hero.mockup.msg7Time")} read index={6}>
               {t("hero.mockup.msg7Bot")}
             </Bubble>
-            <Bubble side="them" time={t("hero.mockup.msg8Time")}>
+            <Bubble side="them" time={t("hero.mockup.msg8Time")} index={7}>
               {t("hero.mockup.msg8Customer")}
             </Bubble>
             <CtaBubble
+              index={8}
               text={t("hero.mockup.msg9Bot")}
               cta={t("hero.mockup.ctaButton")}
               time={t("hero.mockup.msg9Time")}
             />
-            <Bubble side="me" time={t("hero.mockup.msg11Time")} read>
+            <Bubble side="them" time={t("hero.mockup.msg10Time")} index={9}>
+              {t("hero.mockup.msg10Customer")}
+            </Bubble>
+            <Bubble side="me" time={t("hero.mockup.msg11Time")} read index={10}>
               {t("hero.mockup.msg11Bot")}
             </Bubble>
           </div>
 
           {/* Composer */}
-          <div className="flex items-center gap-2 px-2.5 py-2 bg-[#f0f2f0] shrink-0" dir="rtl">
+          <div
+            className="flex items-center gap-2 px-2.5 py-2 bg-[#f0f2f0] shrink-0"
+            dir="rtl"
+          >
             <div className="flex-1 flex items-center gap-2 bg-white rounded-full px-3 py-1.5">
               <span className="text-[#9aa6a6] text-[0.78rem]">
                 {t("hero.mockup.composerHint")}
@@ -307,7 +313,16 @@ function PhoneMockup() {
       >
         <div className="flex items-center gap-2.5 mb-2">
           <span className="size-7 rounded-full bg-[color:var(--color-mint-200)] flex items-center justify-center shrink-0">
-            <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" className="size-4 text-[color:var(--color-mint-500)]" aria-hidden>
+            <svg
+              viewBox="0 0 12 12"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="size-4 text-[color:var(--color-mint-500)]"
+              aria-hidden
+            >
               <polyline points="2 6 5 9 10 3" />
             </svg>
           </span>
@@ -320,7 +335,10 @@ function PhoneMockup() {
             <CalendarMiniIcon />
             <span>{t("hero.mockup.successWhen")}</span>
           </div>
-          <div className="flex items-center gap-2 text-[color:var(--color-fg-secondary)]" dir="ltr">
+          <div
+            className="flex items-center gap-2 text-[color:var(--color-fg-secondary)]"
+            dir="ltr"
+          >
             <PhoneMiniIcon />
             <span className="font-[family-name:var(--font-mono)]">
               {t("hero.mockup.successPhone")}
@@ -357,15 +375,20 @@ function Bubble({
   side,
   time,
   read,
+  index = 0,
 }: {
   children: React.ReactNode;
   side: "me" | "them";
   time: string;
   read?: boolean;
+  index?: number;
 }) {
   const isMe = side === "me";
   return (
-    <div className={"flex " + (isMe ? "justify-end" : "justify-start")}>
+    <div
+      className={"chat-pop flex " + (isMe ? "justify-end" : "justify-start")}
+      style={{ "--chat-i": index } as React.CSSProperties}
+    >
       <div
         className={
           "max-w-[82%] px-2.5 pt-1.5 pb-1 text-[0.82rem] leading-snug shadow-sm relative " +
@@ -375,10 +398,7 @@ function Bubble({
         }
       >
         <div>{children}</div>
-        <div
-          className="flex items-center justify-end gap-1 mt-0.5"
-          dir="ltr"
-        >
+        <div className="flex items-center justify-end gap-1 mt-0.5" dir="ltr">
           <span className="text-[0.62rem] text-[#7a7a7a] font-[family-name:var(--font-mono)]">
             {time}
           </span>
@@ -411,9 +431,12 @@ function ReadReceipt() {
   );
 }
 
-function DateChip({ label }: { label: string }) {
+function DateChip({ label, index = 0 }: { label: string; index?: number }) {
   return (
-    <div className="flex justify-center my-1">
+    <div
+      className="chat-pop flex justify-center my-1"
+      style={{ "--chat-i": index } as React.CSSProperties}
+    >
       <span className="px-2.5 py-0.5 rounded-md bg-white/95 text-[#5a5a5a] text-[0.62rem] font-semibold uppercase tracking-[0.06em] shadow-sm font-[family-name:var(--font-display)]">
         {label}
       </span>
@@ -425,13 +448,18 @@ function CtaBubble({
   text,
   cta,
   time,
+  index = 0,
 }: {
   text: string;
   cta: string;
   time: string;
+  index?: number;
 }) {
   return (
-    <div className="flex justify-end">
+    <div
+      className="chat-pop flex justify-end"
+      style={{ "--chat-i": index } as React.CSSProperties}
+    >
       <div className="max-w-[88%] bg-[#dcf8c6] text-[#0a1414] rounded-[10px] rounded-br-[2px] shadow-sm overflow-hidden">
         <div className="px-2.5 py-1.5 text-[0.82rem] leading-snug">
           {text}
@@ -440,9 +468,7 @@ function CtaBubble({
           </span>
         </div>
         {/* WhatsApp-style interactive reply button */}
-        <div
-          className="flex items-center justify-center gap-1.5 px-3 py-2 bg-white border-t border-[#dcf8c6] text-[#075e54] font-semibold text-[0.78rem]"
-        >
+        <div className="flex items-center justify-center gap-1.5 px-3 py-2 bg-white border-t border-[#dcf8c6] text-[#075e54] font-semibold text-[0.78rem]">
           <CalendarPlusIcon />
           {cta}
         </div>
@@ -457,15 +483,20 @@ function ListingCard({
   rooms,
   price,
   tag,
+  index = 0,
 }: {
   title: string;
   area: string;
   rooms: string;
   price: string;
   tag: string;
+  index?: number;
 }) {
   return (
-    <div className="flex justify-end">
+    <div
+      className="chat-pop flex justify-end"
+      style={{ "--chat-i": index } as React.CSSProperties}
+    >
       <div className="max-w-[86%] bg-white rounded-[10px] rounded-br-[2px] overflow-hidden shadow-sm">
         <div
           className="h-16 w-full relative"
@@ -490,7 +521,10 @@ function ListingCard({
               {title}
             </span>
           </div>
-          <div className="flex items-center gap-1.5 text-[0.66rem] text-[#5a5a5a] mb-1" dir="rtl">
+          <div
+            className="flex items-center gap-1.5 text-[0.66rem] text-[#5a5a5a] mb-1"
+            dir="rtl"
+          >
             <span>{area}</span>
             <span>·</span>
             <span>{rooms}</span>
@@ -515,7 +549,16 @@ function TrustBadge({ label }: { label: string }) {
   return (
     <span className="inline-flex items-center gap-2 text-[0.85rem] font-[family-name:var(--font-display)] font-medium text-[color:var(--color-fg-secondary)]">
       <span className="size-5 rounded-full bg-[color:var(--color-mint-200)] flex items-center justify-center">
-        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" className="size-3 text-[color:var(--color-mint-500)]" aria-hidden>
+        <svg
+          viewBox="0 0 12 12"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.4"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="size-3 text-[color:var(--color-mint-500)]"
+          aria-hidden
+        >
           <polyline points="2 6 5 9 10 3" />
         </svg>
       </span>
@@ -605,14 +648,27 @@ function Leaves() {
 
 function BoltIcon({ className = "" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className={`size-4 ${className}`} aria-hidden>
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className={`size-4 ${className}`}
+      aria-hidden
+    >
       <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" />
     </svg>
   );
 }
 function TrendIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="size-5">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="size-5"
+    >
       <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
       <polyline points="16 7 22 7 22 13" />
     </svg>
@@ -620,7 +676,15 @@ function TrendIcon() {
 }
 function HeadphonesIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="size-5">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="size-5"
+    >
       <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
       <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
     </svg>
@@ -635,12 +699,20 @@ function WhatsAppIcon() {
 }
 function SignalIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="size-3"><path d="M2 17l4-4 4 4 5-5 5 5 4-4v8H2z" /></svg>
+    <svg viewBox="0 0 24 24" fill="currentColor" className="size-3">
+      <path d="M2 17l4-4 4 4 5-5 5 5 4-4v8H2z" />
+    </svg>
   );
 }
 function WifiIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="size-3">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      className="size-3"
+    >
       <path d="M5 12.55a11 11 0 0 1 14 0M8 16.05a6 6 0 0 1 8 0M11 19.55a1.5 1.5 0 0 1 2 0" />
       <line x1="12" y1="20" x2="12" y2="20" />
     </svg>
@@ -648,7 +720,13 @@ function WifiIcon() {
 }
 function BatteryIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="size-4">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      className="size-4"
+    >
       <rect x="2" y="7" width="18" height="10" rx="2" />
       <rect x="3" y="8" width="14" height="8" rx="1" fill="currentColor" />
       <line x1="22" y1="11" x2="22" y2="13" />
@@ -657,7 +735,15 @@ function BatteryIcon() {
 }
 function ArrowBackIcon({ className = "" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`size-5 ${className}`}>
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="white"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`size-5 ${className}`}
+    >
       <line x1="19" y1="12" x2="5" y2="12" />
       <polyline points="12 19 5 12 12 5" />
     </svg>
@@ -667,13 +753,26 @@ function CheckBadge() {
   return (
     <svg viewBox="0 0 16 16" className="size-3.5" aria-hidden>
       <circle cx="8" cy="8" r="8" fill="#34a4ff" />
-      <polyline points="4.5 8.5 7 11 12 5.5" fill="none" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+      <polyline
+        points="4.5 8.5 7 11 12 5.5"
+        fill="none"
+        stroke="white"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
 function VideoIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" className="size-5">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="white"
+      strokeWidth="2"
+      className="size-5"
+    >
       <path d="M23 7l-7 5 7 5V7z" />
       <rect x="1" y="5" width="15" height="14" rx="2" />
     </svg>
@@ -690,7 +789,15 @@ function DotsIcon() {
 }
 function CalendarMiniIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-3.5 shrink-0">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="size-3.5 shrink-0"
+    >
       <rect x="3" y="4" width="18" height="18" rx="2" />
       <line x1="16" y1="2" x2="16" y2="6" />
       <line x1="8" y1="2" x2="8" y2="6" />
@@ -700,7 +807,15 @@ function CalendarMiniIcon() {
 }
 function CalendarPlusIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="size-4">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="size-4"
+    >
       <rect x="3" y="4" width="18" height="18" rx="2" />
       <line x1="16" y1="2" x2="16" y2="6" />
       <line x1="8" y1="2" x2="8" y2="6" />
@@ -712,7 +827,15 @@ function CalendarPlusIcon() {
 }
 function PhoneMiniIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-3.5 shrink-0">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="size-3.5 shrink-0"
+    >
       <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
     </svg>
   );
@@ -733,7 +856,15 @@ function PinIcon({ className = "" }: { className?: string }) {
 }
 function MicIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-5">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="white"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="size-5"
+    >
       <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
       <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
       <line x1="12" y1="19" x2="12" y2="23" />
