@@ -1,15 +1,14 @@
 import { cn } from "@/lib/utils";
 
 /**
- * Compact "PA" monogram in Amiri — used in the dashboard header. The
- * landing page has its own larger masthead treatment inline. This is
- * the everyday-utility version.
+ * Wordmark + tiny sage glyph. Two stacked rounded squares offset
+ * slightly — calm, geometric, no cultural pastiche.
  */
 export function Logo({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        "inline-flex items-baseline gap-2",
+        "inline-flex items-center gap-2.5",
         "font-[family-name:var(--font-display)]",
         className,
       )}
@@ -17,17 +16,29 @@ export function Logo({ className }: { className?: string }) {
       <svg
         viewBox="0 0 32 32"
         fill="none"
-        className="size-7 text-[color:var(--color-brick)]"
+        className="size-7"
         aria-hidden
       >
-        {/* Eight-point star — Cairo doorway lattice */}
-        <g stroke="currentColor" strokeWidth="1.4" fill="none">
-          <rect x="6" y="6" width="20" height="20" transform="rotate(0 16 16)" />
-          <rect x="6" y="6" width="20" height="20" transform="rotate(45 16 16)" />
-        </g>
-        <circle cx="16" cy="16" r="2.4" fill="currentColor" />
+        <rect
+          x="5"
+          y="5"
+          width="16"
+          height="16"
+          rx="3.5"
+          fill="var(--color-brick)"
+          opacity="0.85"
+        />
+        <rect
+          x="11"
+          y="11"
+          width="16"
+          height="16"
+          rx="3.5"
+          fill="var(--color-teal)"
+          opacity="0.9"
+        />
       </svg>
-      <span className="text-[1.15rem] tracking-tight text-[color:var(--color-ink)]">
+      <span className="text-[1.05rem] font-semibold tracking-[-0.01em] text-[color:var(--color-ink)]">
         Property<span className="text-[color:var(--color-brick)]">·</span>Agent
       </span>
     </span>

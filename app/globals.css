@@ -1,74 +1,76 @@
 @import "tailwindcss";
 
 /* ────────────────────────────────────────────────────────────────
-   Editorial Mercantile — sandstone ledger meets contemporary fintech.
-   Refined palette, all-serif typography, hairline rules instead of
-   decorative chrome. The chat UI shouts; the broker desk listens.
+   Soft Oasis — calm, modern, generous. Off-white surfaces, sage
+   primary, clay secondary. Single-layer shadows. Rounded but not
+   bubbly. Inter + Geist for English, IBM Plex Sans Arabic for ar.
    ──────────────────────────────────────────────────────────────── */
 
 @theme {
-  /* Surfaces — paper warming, ink that breathes */
-  --color-paper:        #f3ebdc;
-  --color-paper-shade:  #ece1ca;
-  --color-paper-deep:   #e2d3b7;
-  --color-paper-cream:  #faf6ec;
-  --color-vellum:       #fbf6e9;
+  /* Surfaces */
+  --color-paper:        #fafaf7;       /* page background */
+  --color-paper-cream:  #ffffff;       /* card surface */
+  --color-paper-shade:  #f3f1ec;       /* skeleton base / hover */
+  --color-paper-deep:   #ebe9e3;       /* slight pressed-down tone */
+  --color-vellum:       #fbfaf6;       /* section bands */
 
-  /* Ink hierarchy */
-  --color-ink:          #1f1712;
-  --color-ink-soft:     #4a3e33;
-  --color-ink-faint:    #8b7d6a;
-  --color-ink-mute:     #a99a85;
+  /* Ink hierarchy — true charcoal, no warm tint */
+  --color-ink:          #1c1c1c;
+  --color-ink-soft:     #404040;
+  --color-ink-faint:    #737373;
+  --color-ink-mute:     #a3a3a3;
 
-  /* Hairlines — the workhorse of editorial restraint */
-  --color-rule:         rgba(31, 23, 18, 0.14);
-  --color-rule-strong:  rgba(31, 23, 18, 0.32);
-  --color-rule-soft:    rgba(31, 23, 18, 0.07);
+  /* Hairlines — barely-there warm gray */
+  --color-rule:         #ebe9e3;
+  --color-rule-strong:  #d4d1c8;
+  --color-rule-soft:    #f3f1ec;
 
-  /* Accent registers — used sparingly */
-  --color-brick:        #a7421f;
-  --color-brick-deep:   #7a2f14;
-  --color-brick-tint:   rgba(167, 66, 31, 0.08);
-  --color-teal:         #2e5a5e;
-  --color-teal-tint:    rgba(46, 90, 94, 0.09);
-  --color-gold:         #b08d3f;
-  --color-gold-tint:    rgba(176, 141, 63, 0.12);
+  /* Accents — sage primary, clay secondary */
+  --color-brick:        #7a8b6e;       /* sage (kept legacy name) */
+  --color-brick-deep:   #5e6e54;
+  --color-brick-tint:   rgba(122, 139, 110, 0.10);
+  --color-teal:         #c4866b;       /* clay (legacy name kept) */
+  --color-teal-tint:    rgba(196, 134, 107, 0.12);
+  --color-gold:         #b88848;
+  --color-gold-tint:    rgba(184, 136, 72, 0.12);
 
-  /* Status semantics — narrower than the design tokens */
-  --color-ok:           #2f6b3b;
-  --color-warn:         #b08d3f;
-  --color-err:          #931616;
-  --color-ok-tint:      rgba(47, 107, 59, 0.1);
-  --color-warn-tint:    rgba(176, 141, 63, 0.13);
-  --color-err-tint:     rgba(147, 22, 22, 0.1);
+  /* Status semantics */
+  --color-ok:           #5e8b5a;
+  --color-warn:         #b88848;
+  --color-err:          #c2554c;
+  --color-ok-tint:      rgba(94, 139, 90, 0.12);
+  --color-warn-tint:    rgba(184, 136, 72, 0.12);
+  --color-err-tint:     rgba(194, 85, 76, 0.10);
 
-  /* Type stack — all serif, no system-sans escape hatch */
-  --font-display: var(--font-amiri),  "Amiri",        "Markazi Text", serif;
-  --font-serif:   var(--font-garamond), "EB Garamond", "Markazi Text", serif;
-  --font-body:    var(--font-markazi),  "Markazi Text", "EB Garamond", serif;
-  --font-mono:    "Iosevka", "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", monospace;
+  /* Type — modern sans, IBM Plex Sans Arabic for ar fallback */
+  --font-display:  var(--font-geist),         "Geist",              "IBM Plex Sans Arabic", "Inter", system-ui, sans-serif;
+  --font-body:     var(--font-inter),         "Inter",              "IBM Plex Sans Arabic", system-ui, sans-serif;
+  --font-serif:    var(--font-inter),         "Inter",              "IBM Plex Sans Arabic", system-ui, sans-serif;
+  --font-mono:     var(--font-geist-mono),    "Geist Mono",         "JetBrains Mono",      "SFMono-Regular", monospace;
+  --font-quote:    var(--font-source-serif),  "Source Serif 4",     "Source Serif Pro",    "Georgia", serif;
+  --font-arabic:   var(--font-plex-arabic),   "IBM Plex Sans Arabic","Tajawal",            system-ui, sans-serif;
 
-  /* Scale — generous, editorial */
+  /* Scale — modern, balanced */
   --text-xs:    0.78rem;
-  --text-sm:    0.9rem;
-  --text-base:  1.05rem;   /* serif body wants a notch larger than sans */
-  --text-lg:    1.25rem;
-  --text-xl:    1.6rem;
-  --text-2xl:   2.05rem;
-  --text-3xl:   2.85rem;
-  --text-4xl:   3.85rem;
-  --text-5xl:   5.2rem;
+  --text-sm:    0.88rem;
+  --text-base:  1rem;
+  --text-lg:    1.15rem;
+  --text-xl:    1.45rem;
+  --text-2xl:   1.85rem;
+  --text-3xl:   2.4rem;
+  --text-4xl:   3.2rem;
+  --text-5xl:   4.4rem;
 
-  /* Shadows — soft, paper-like, never aggressive */
-  --shadow-leaf:  0 1px 0 rgba(31, 23, 18, 0.04), 0 8px 24px -12px rgba(31, 23, 18, 0.16);
-  --shadow-card:  0 1px 0 rgba(31, 23, 18, 0.04), 0 14px 40px -22px rgba(31, 23, 18, 0.24);
-  --shadow-deed:  0 1px 0 rgba(31, 23, 18, 0.06), 0 30px 80px -36px rgba(31, 23, 18, 0.28);
+  /* Shadows — soft single-layer */
+  --shadow-leaf:  0 1px 2px rgba(28, 28, 28, 0.04), 0 1px 3px rgba(28, 28, 28, 0.05);
+  --shadow-card:  0 2px 8px rgba(28, 28, 28, 0.04), 0 4px 16px rgba(28, 28, 28, 0.05);
+  --shadow-deed:  0 8px 24px rgba(28, 28, 28, 0.06), 0 2px 6px rgba(28, 28, 28, 0.04);
 
-  /* Radius — paper edges are sharp, ours nearly are */
-  --radius-xs: 2px;
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 10px;
+  /* Radius — rounded modern */
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
 }
 
 /* ────────────────────────────────────────────────────────────────
@@ -78,62 +80,66 @@ html, body {
   background: var(--color-paper);
   color: var(--color-ink);
   font-family: var(--font-body);
-  font-feature-settings: "ss01", "ss02";
-  font-variant-numeric: oldstyle-nums;
+  font-feature-settings: "cv11", "ss01";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
 
-/* The page texture — a quiet warm wash, never noisy */
-body {
-  background-image:
-    radial-gradient(ellipse at top left,    rgba(167, 66, 31, 0.05), transparent 55%),
-    radial-gradient(ellipse at bottom right, rgba(176, 141, 63, 0.06), transparent 60%),
-    linear-gradient(to bottom, var(--color-vellum), var(--color-paper) 30%);
-  background-attachment: fixed;
-  min-height: 100dvh;
+/* RTL by default, ar text uses Plex Arabic */
+html[dir="rtl"] body {
+  direction: rtl;
+  font-family: var(--font-arabic);
 }
 
-/* RTL is the default; English blocks opt back into LTR locally */
-html[dir="rtl"] body { direction: rtl; }
+body { min-height: 100dvh; }
 
-/* Typography defaults — let pages override sizes, not faces */
-h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 400; line-height: 1.1; letter-spacing: -0.005em; }
-h5, h6        { font-family: var(--font-serif);   font-weight: 600; line-height: 1.2; }
+/* Headings — Geist for English, Plex Arabic on RTL */
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+}
+html[dir="rtl"] h1,
+html[dir="rtl"] h2,
+html[dir="rtl"] h3,
+html[dir="rtl"] h4 {
+  font-family: var(--font-arabic);
+  font-weight: 700;
+  letter-spacing: 0;
+}
 
-/* Tabular numerics for tables + stats — old-style figures with hands-on rhythm */
+h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
 .numerals,
 table tbody td.num,
 .tabular {
-  font-variant-numeric: tabular-nums oldstyle-nums;
-  font-feature-settings: "tnum", "onum";
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
 }
+.lining { font-variant-numeric: lining-nums tabular-nums; }
 
-/* Lining figures (modern numbers) for tight spaces — buttons, badges */
-.lining {
-  font-variant-numeric: lining-nums tabular-nums;
-}
-
-/* Selection — ink-on-brick whisper */
 ::selection {
-  background: var(--color-brick);
-  color: var(--color-paper-cream);
+  background: var(--color-brick-tint);
+  color: var(--color-ink);
 }
 
-/* Focus — visible but quiet */
 :focus-visible {
   outline: 2px solid var(--color-brick);
   outline-offset: 2px;
   border-radius: var(--radius-xs);
 }
 
-/* Hairlines — the load-bearing grammar of editorial restraint */
 .rule        { border-color: var(--color-rule); }
 .rule-strong { border-color: var(--color-rule-strong); }
 .rule-soft   { border-color: var(--color-rule-soft); }
 
-/* Page container — wide enough for tables, narrow enough to read */
+/* Container — generous reading width */
 .deck {
   max-width: 1240px;
   margin-inline: auto;
@@ -146,79 +152,56 @@ table tbody td.num,
   padding-inline: clamp(1.25rem, 4vw, 2rem);
 }
 
-/* Magazine-grade card — a sheet of paper with a single hairline */
+/* Card — clean white surface, soft shadow, generous radius */
 .sheet {
   background: var(--color-paper-cream);
   border: 1px solid var(--color-rule);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-leaf);
 }
+
+/* Accent card — slightly more lift, sage→clay gradient bar at top */
 .sheet-deed {
-  background:
-    linear-gradient(135deg, var(--color-paper-cream) 0%, var(--color-vellum) 100%);
-  border: 1px solid var(--color-rule-strong);
+  background: var(--color-paper-cream);
+  border: 1px solid var(--color-rule);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-deed);
+  box-shadow: var(--shadow-card);
   position: relative;
+  overflow: hidden;
 }
 .sheet-deed::before {
   content: "";
   position: absolute;
-  inset: 6px;
-  border: 1px solid var(--color-rule-soft);
-  border-radius: calc(var(--radius-md) - 2px);
-  pointer-events: none;
+  inset-block-start: 0;
+  inset-inline: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-brick), var(--color-teal));
 }
 
-/* Display number — for stat cards (large, oldstyle, slightly italic for warmth) */
+/* Display number — for stat cards */
 .figure {
   font-family: var(--font-display);
-  font-size: clamp(2.4rem, 5vw, 3.4rem);
+  font-size: clamp(2rem, 4.5vw, 2.8rem);
   line-height: 1;
-  letter-spacing: -0.01em;
-  font-variant-numeric: oldstyle-nums tabular-nums;
+  letter-spacing: -0.025em;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
-/* Eyebrow / kicker — small caps over a section */
+/* Eyebrow — quiet uppercase label */
 .eyebrow {
-  font-family: var(--font-serif);
-  font-size: 0.74rem;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
   font-weight: 500;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-ink-faint);
 }
 
-/* The masthead band — newspaper top, sized for the landing only */
-.masthead {
-  border-bottom: 2px double var(--color-rule-strong);
-  padding-block: 1.5rem;
-  position: relative;
-}
-.masthead::before {
-  content: "";
-  position: absolute;
-  inset-inline: 0;
-  bottom: -6px;
-  height: 1px;
-  background: var(--color-rule);
-}
-
-/* Pull-quote / drop cap support for the landing hero */
-.dropcap::first-letter {
-  font-family: var(--font-display);
-  font-size: 4.4em;
-  float: inline-start;
-  line-height: 0.85;
-  margin-inline-end: 0.12em;
-  margin-block-start: 0.06em;
-  color: var(--color-brick);
-}
-
-/* Quiet text-button reset */
+/* Linkish — subtle underline on hover */
 .linkish {
   color: var(--color-ink);
-  border-bottom: 1px solid var(--color-rule-strong);
+  border-bottom: 1px solid transparent;
   padding-bottom: 1px;
   transition: border-color 180ms ease, color 180ms ease;
 }
@@ -227,21 +210,19 @@ table tbody td.num,
   border-bottom-color: var(--color-brick);
 }
 
-/* Page-load reveal — staggered hint, not a parade */
-@keyframes ledger-rise {
-  from { opacity: 0; transform: translateY(8px); }
+/* Page-load reveal — quick, springy */
+@keyframes oasis-rise {
+  from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.rise-1 { animation: ledger-rise 520ms cubic-bezier(0.2, 0.7, 0.2, 1) 80ms both; }
-.rise-2 { animation: ledger-rise 520ms cubic-bezier(0.2, 0.7, 0.2, 1) 180ms both; }
-.rise-3 { animation: ledger-rise 520ms cubic-bezier(0.2, 0.7, 0.2, 1) 280ms both; }
-.rise-4 { animation: ledger-rise 520ms cubic-bezier(0.2, 0.7, 0.2, 1) 380ms both; }
+.rise-1 { animation: oasis-rise 380ms cubic-bezier(0.2, 0.8, 0.2, 1) 60ms both; }
+.rise-2 { animation: oasis-rise 380ms cubic-bezier(0.2, 0.8, 0.2, 1) 140ms both; }
+.rise-3 { animation: oasis-rise 380ms cubic-bezier(0.2, 0.8, 0.2, 1) 220ms both; }
+.rise-4 { animation: oasis-rise 380ms cubic-bezier(0.2, 0.8, 0.2, 1) 300ms both; }
 
-/* Subtle in-table hover — ink wash, not a fill */
-.row-hover:hover { background: rgba(31, 23, 18, 0.025); }
+.row-hover:hover { background: rgba(28, 28, 28, 0.025); }
 
-/* Skeleton shimmer — paper-warm */
-@keyframes paper-shimmer {
+@keyframes oasis-shimmer {
   0%   { background-position:  -200% 0; }
   100% { background-position:   200% 0; }
 }
@@ -253,11 +234,11 @@ table tbody td.num,
     var(--color-paper-shade) 70%
   );
   background-size: 200% 100%;
-  animation: paper-shimmer 1.6s ease-in-out infinite;
+  animation: oasis-shimmer 1.4s ease-in-out infinite;
   border-radius: var(--radius-sm);
 }
 
-/* Scrollbar — barely there */
+/* Scrollbar — minimal */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-thumb { background: var(--color-rule-strong); border-radius: 999px; border: 2px solid var(--color-paper); }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-ink-faint); }

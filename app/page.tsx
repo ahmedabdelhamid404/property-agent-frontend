@@ -2,35 +2,15 @@ import Link from "next/link";
 import { SiteHeader } from "@/components/SiteHeader";
 import { AuthedRedirect } from "@/components/AuthedRedirect";
 
-const today = new Intl.DateTimeFormat("en-GB", {
-  weekday: "long",
-  day: "2-digit",
-  month: "long",
-  year: "numeric",
-}).format(new Date());
-
 export default function Home() {
   return (
     <>
       <AuthedRedirect />
       <SiteHeader />
 
-      {/* ─── HERO / MASTHEAD ──────────────────────────────────── */}
+      {/* ─── HERO ─────────────────────────────────────────────── */}
       <section className="relative">
-        <div className="masthead">
-          <div className="deck flex items-baseline justify-between gap-6 text-[color:var(--color-ink-soft)]">
-            <div className="eyebrow rise-1">العدد الأول · مكتب الوسطاء</div>
-            <div
-              className="hidden md:block font-[family-name:var(--font-serif)] italic text-[0.85rem] rise-1"
-              dir="ltr"
-            >
-              {today}
-            </div>
-            <div className="eyebrow rise-1">القاهرة · مصر</div>
-          </div>
-        </div>
-
-        <div className="deck pt-14 pb-20 md:pt-20 md:pb-28">
+        <div className="deck pt-20 pb-20 md:pt-28 md:pb-32">
           <p className="eyebrow mb-5 rise-1">
             وكيلك العقاري الذكي على واتساب
           </p>
@@ -43,15 +23,9 @@ export default function Home() {
             وأنت في السيارة.
           </h1>
 
-          <p
-            className="rise-3 mt-7 max-w-[60ch] font-[family-name:var(--font-body)] text-[1.2rem] leading-[1.55] text-[color:var(--color-ink-soft)]"
-            dir="ltr"
-            lang="en"
-          >
-            <span dir="rtl" lang="ar">
-              ربط بسيط بمخزونك من العقارات. محادثة عربية طبيعية بمستوى وسيط
-              قاهري متمرّس. تنبيه فوري لك بكلّ عميل جاهز يطلب التواصل.
-            </span>
+          <p className="rise-3 mt-7 max-w-[60ch] font-[family-name:var(--font-body)] text-[1.15rem] leading-[1.6] text-[color:var(--color-ink-soft)]">
+            ربط بسيط بمخزونك من العقارات. محادثة عربية طبيعية بمستوى وسيط
+            قاهري متمرّس. تنبيه فوري لك بكلّ عميل جاهز يطلب التواصل.
           </p>
 
           <div className="rise-3 mt-10 flex flex-wrap items-center gap-5">
@@ -125,10 +99,10 @@ export default function Home() {
       {/* ─── FOOTER ───────────────────────────────────────────── */}
       <footer className="border-t border-[color:var(--color-rule)]">
         <div className="deck py-10 flex flex-wrap items-center justify-between gap-4 text-[color:var(--color-ink-faint)]">
-          <p className="font-[family-name:var(--font-serif)] text-[0.92rem] italic">
-            Property-Agent — مكتب الوسطاء الرقمي · القاهرة
+          <p className="text-[0.92rem]">
+            Property-Agent · القاهرة
           </p>
-          <p className="font-[family-name:var(--font-serif)] text-[0.85rem] tracking-[0.04em]" dir="ltr">
+          <p className="text-[0.85rem] tracking-[0.04em]" dir="ltr">
             v1 · {new Date().getFullYear()}
           </p>
         </div>

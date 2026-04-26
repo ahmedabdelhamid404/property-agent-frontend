@@ -72,13 +72,12 @@ export default function SignupPage() {
       <div className="deck grid grid-cols-1 md:grid-cols-[1fr_minmax(0,460px)] gap-12 md:gap-20 py-14 md:py-20">
         {/* ─── Pull-quote / pitch column ───────────────────── */}
         <aside className="md:pe-8 md:border-e md:border-[color:var(--color-rule)] rise-1">
-          <p className="eyebrow mb-4">قيد التسجيل</p>
-          <h1 className="font-[family-name:var(--font-display)] text-[clamp(2.2rem,4.6vw,3.4rem)] leading-[1] text-[color:var(--color-ink)] mb-6 max-w-[14ch]">
-            دفترك في{" "}
+          <p className="eyebrow mb-4">تسجيل وسيط جديد</p>
+          <h1 className="font-[family-name:var(--font-display)] text-[clamp(2.2rem,4.6vw,3.4rem)] leading-[1.05] text-[color:var(--color-ink)] mb-6 max-w-[14ch]">
+            ابدأ في{" "}
             <em className="not-italic text-[color:var(--color-brick)]">
-              مكتب الوسطاء
-            </em>{" "}
-            بيتسجّل دلوقتي.
+              دقيقة واحدة
+            </em>
           </h1>
           <p className="font-[family-name:var(--font-body)] text-[1.15rem] leading-[1.55] text-[color:var(--color-ink-soft)] mb-7">
             كل البيانات اللي بنطلبها بس عشان نعرف نوصّل لك العميل لما يطلبك.
@@ -195,9 +194,9 @@ function SuccessDeed({ data }: { data: SignupResponse }) {
   return (
     <div className="sheet-deed p-8 md:p-10">
       <div className="flex items-baseline justify-between gap-4 mb-6">
-        <p className="eyebrow">سند تسجيل</p>
+        <p className="eyebrow">تم التسجيل</p>
         <p
-          className="font-[family-name:var(--font-serif)] italic text-[0.85rem] text-[color:var(--color-ink-faint)] tabular numerals"
+          className="font-[family-name:var(--font-mono)] text-[0.82rem] text-[color:var(--color-ink-faint)] tabular numerals"
           dir="ltr"
         >
           #{data.tenantId.toString().padStart(4, "0")}

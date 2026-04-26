@@ -64,7 +64,7 @@ export function LeadsSection() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h2 className="font-[family-name:var(--font-display)] text-[1.6rem] text-[color:var(--color-ink)] tracking-tight">
-            دفتر العملاء
+            العملاء
           </h2>
           {data ? (
             <p className="mt-1 font-[family-name:var(--font-serif)] italic text-[0.92rem] text-[color:var(--color-ink-faint)]">
@@ -102,7 +102,7 @@ export function LeadsSection() {
           hint={
             statusFilter
               ? "غيّر الفلتر، أو ابدأ بنشر رابط الواتساب الخاص بيك."
-              : "أول عميل يفتح رابط الواتساب الخاص بيك ويطلب يتواصل، هيظهر في الدفتر هنا."
+              : "أول عميل يفتح رابط الواتساب الخاص بيك ويطلب يتواصل، هيظهر هنا."
           }
         />
       ) : (

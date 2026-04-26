@@ -173,7 +173,7 @@ export function InventorySection() {
         {result ? (
           <div className="sheet-deed p-7 mt-2">
             <div className="flex items-baseline justify-between gap-4 mb-5">
-              <p className="eyebrow">سند الرفع</p>
+              <p className="eyebrow">نتيجة الرفع</p>
               <p
                 className="font-[family-name:var(--font-serif)] italic text-[0.85rem] text-[color:var(--color-ink-faint)]"
                 dir="ltr"

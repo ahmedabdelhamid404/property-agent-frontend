@@ -1,27 +1,44 @@
 import type { Metadata } from "next";
-import { Amiri, EB_Garamond, Markazi_Text } from "next/font/google";
+import {
+  Geist,
+  Geist_Mono,
+  Inter,
+  IBM_Plex_Sans_Arabic,
+  Source_Serif_4,
+} from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 
-const amiri = Amiri({
-  subsets: ["arabic", "latin"],
-  weight: ["400", "700"],
-  variable: "--font-amiri",
-  display: "swap",
-});
-
-const garamond = EB_Garamond({
+const geist = Geist({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  style: ["normal", "italic"],
-  variable: "--font-garamond",
+  variable: "--font-geist",
   display: "swap",
 });
 
-const markazi = Markazi_Text({
+const geistMono = Geist_Mono({
+  subsets: ["latin"],
+  variable: "--font-geist-mono",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const plexArabic = IBM_Plex_Sans_Arabic({
   subsets: ["arabic", "latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-markazi",
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-plex-arabic",
+  display: "swap",
+});
+
+const sourceSerif = Source_Serif_4({
+  subsets: ["latin"],
+  weight: ["400", "600"],
+  style: ["normal", "italic"],
+  variable: "--font-source-serif",
   display: "swap",
 });
 
@@ -38,7 +55,7 @@ export default function RootLayout({
     <html
       lang="ar"
       dir="rtl"
-      className={`${amiri.variable} ${garamond.variable} ${markazi.variable}`}
+      className={`${geist.variable} ${geistMono.variable} ${inter.variable} ${plexArabic.variable} ${sourceSerif.variable}`}
     >
       <body className="min-h-dvh">
         {children}
@@ -47,10 +64,10 @@ export default function RootLayout({
           dir="rtl"
           toastOptions={{
             style: {
-              fontFamily: "var(--font-body)",
+              fontFamily: "var(--font-arabic)",
               background: "var(--color-paper-cream)",
               color: "var(--color-ink)",
-              border: "1px solid var(--color-rule-strong)",
+              border: "1px solid var(--color-rule)",
               borderRadius: "var(--radius-sm)",
               boxShadow: "var(--shadow-card)",
             },
