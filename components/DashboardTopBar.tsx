@@ -6,14 +6,16 @@ import { useEffect, useState } from "react";
 import { Logo } from "./Logo";
 import { LanguageToggle } from "./LanguageToggle";
 import { useI18n } from "./I18nProvider";
+import { NotificationBell } from "./NotificationBell";
 import { broker } from "@/lib/storage";
 import { cn } from "@/lib/utils";
 
-type PageKey = "overview" | "leads" | "inventory" | "analytics" | "settings";
+type PageKey = "overview" | "leads" | "inventory" | "knowledge" | "analytics" | "settings";
 
 function detectPage(pathname: string): PageKey {
   if (pathname.startsWith("/dashboard/leads")) return "leads";
   if (pathname.startsWith("/dashboard/inventory")) return "inventory";
+  if (pathname.startsWith("/dashboard/knowledge")) return "knowledge";
   if (pathname.startsWith("/dashboard/analytics")) return "analytics";
   if (pathname.startsWith("/dashboard/settings")) return "settings";
   return "overview";
@@ -90,6 +92,7 @@ export function DashboardTopBar() {
                 {name}
               </span>
             ) : null}
+            <NotificationBell />
             <LanguageToggle />
           </div>
         </div>
@@ -139,6 +142,7 @@ function MobileDrawer({
     { href: "/dashboard/overview", label: t("dashboard.tabStats") },
     { href: "/dashboard/leads", label: t("dashboard.tabLeads") },
     { href: "/dashboard/inventory", label: t("dashboard.tabInventory") },
+    { href: "/dashboard/knowledge", label: t("dashboard.tabKnowledge") },
     { href: "/dashboard/analytics", label: t("dashboard.tabAnalytics") },
     { href: "/dashboard/settings", label: t("dashboard.tabSettings") },
   ];
