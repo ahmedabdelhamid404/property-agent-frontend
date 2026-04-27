@@ -137,6 +137,70 @@ export const apiBroker = {
       signal,
     ) as Promise<InventoryUploadResult>;
   },
+
+  /* ─── T7 — Live notifications (REST half) ───────────────────── */
+  notifications: (unreadOnly = false, limit = 50) =>
+    apiBroker.call(
+      `/api/broker/notifications?unreadOnly=${unreadOnly}&limit=${limit}`,
+    ) as Promise<NotificationsPayload>,
+  markNotificationRead: (id: number) =>
+    apiBroker.call(`/api/broker/notifications/${id}/read`, {
+      method: "POST",
+    }) as Promise<{ ok: boolean }>,
+  dismissNotification: (id: number) =>
+    apiBroker.call(`/api/broker/notifications/${id}/dismiss`, {
+      method: "POST",
+    }) as Promise<{ ok: boolean }>,
+
+  /* ─── T7 — Chat session detail / takeover ───────────────────── */
+  sessionTranscript: (sessionId: number) =>
+    apiBroker.call(`/api/broker/sessions/${sessionId}/transcript`) as Promise<SessionTranscript>,
+  takeOverSession: (sessionId: number) =>
+    apiBroker.call(`/api/broker/sessions/${sessionId}/takeover`, {
+      method: "POST",
+    }) as Promise<{ ok: boolean; sessionId: number; isBrokerHandling: boolean }>,
+  handBackSession: (sessionId: number) =>
+    apiBroker.call(`/api/broker/sessions/${sessionId}/handback`, {
+      method: "POST",
+    }) as Promise<{ ok: boolean; sessionId: number; isBrokerHandling: boolean }>,
+
+  /* ─── T2 — MarketKnowledge (broker-scoped) ─────────────────── */
+  knowledgeList: (params: {
+    topic?: string;
+    activeOnly?: boolean;
+    page?: number;
+    pageSize?: number;
+  } = {}) => {
+    const qs = buildQuery(params);
+    return apiBroker.call(`/api/broker/market-knowledge${qs}`) as Promise<MarketKnowledgePage>;
+  },
+  knowledgeCreate: (body: MarketKnowledgeUpsert) =>
+    apiBroker.call(`/api/broker/market-knowledge`, {
+      method: "POST",
+      body,
+    }) as Promise<{ id: number; embeddingPending: boolean }>,
+  knowledgeUpdate: (id: number, body: MarketKnowledgeUpsert) =>
+    apiBroker.call(`/api/broker/market-knowledge/${id}`, {
+      method: "PUT",
+      body,
+    }) as Promise<{ id: number; changed: boolean; embeddingPending: boolean }>,
+  knowledgeDelete: (id: number) =>
+    apiBroker.call(`/api/broker/market-knowledge/${id}`, {
+      method: "DELETE",
+    }) as Promise<{ deleted: number }>,
+
+  /**
+   * SSE event-stream URL with the tenant key as query param. EventSource
+   * can't set custom headers, so the backend's tenant middleware also
+   * accepts ?tenantKey=... — same auth surface, same scope.
+   */
+  eventsUrl: () => {
+    const key = broker.getKey();
+    if (!key) throw new ApiError(401, null, "Missing X-Tenant-Key");
+    if (!BASE) throw new ApiError(0, null, "NEXT_PUBLIC_API_BASE_URL is not configured");
+    const root = BASE.replace(/\/$/, "");
+    return `${root}/api/broker/events?tenantKey=${encodeURIComponent(key)}`;
+  },
 };
 
 /* ─── Admin (X-Admin-Key) ───────────────────────────────────── */
@@ -166,6 +230,40 @@ export const apiAdmin = {
     apiAdmin.call(
       `/api/admin/notifications/failed?hours=${hours}&limit=${limit}`,
     ) as Promise<FailedNotificationsResult>,
+
+  /* ─── T2 — MarketKnowledge CRUD ───────────────────────────── */
+  knowledgeList: (params: {
+    tenantId?: number;
+    topic?: string;
+    activeOnly?: boolean;
+    page?: number;
+    pageSize?: number;
+  } = {}) => {
+    const qs = buildQuery(params);
+    return apiAdmin.call(`/api/admin/market-knowledge${qs}`) as Promise<MarketKnowledgePage>;
+  },
+  knowledgeCreate: (body: MarketKnowledgeUpsert) =>
+    apiAdmin.call(`/api/admin/market-knowledge`, {
+      method: "POST",
+      body,
+    }) as Promise<{ id: number; embeddingPending: boolean }>,
+  knowledgeUpdate: (id: number, body: MarketKnowledgeUpsert) =>
+    apiAdmin.call(`/api/admin/market-knowledge/${id}`, {
+      method: "PUT",
+      body,
+    }) as Promise<{ id: number; changed: boolean; embeddingPending: boolean }>,
+  knowledgeDelete: (id: number) =>
+    apiAdmin.call(`/api/admin/market-knowledge/${id}`, {
+      method: "DELETE",
+    }) as Promise<{ deleted: number }>,
+
+  /* ─── T6 — Turn-log transcript (Markdown) for review ───────── */
+  turnLogTranscriptUrl: (sessionId: number, tenantId?: number) => {
+    if (!BASE) throw new ApiError(0, null, "NEXT_PUBLIC_API_BASE_URL is not configured");
+    const root = BASE.replace(/\/$/, "");
+    const tid = tenantId ? `?tenantId=${tenantId}` : "";
+    return `${root}/api/admin/turn-logs/transcript/${sessionId}${tid}`;
+  },
 };
 
 function buildQuery(params: Record<string, string | number | boolean | undefined>) {
@@ -343,4 +441,104 @@ export interface InventoryUploadResult {
   duration_ms: number;
   errors_sample: InventoryUploadError[];
   errors_total: number;
+}
+
+/* ─── T7 — Live broker notifications ─────────────────────────── */
+
+export type BrokerNotificationType =
+  | "HotLead"
+  | "DifficultSituation"
+  | "AngryCustomer";
+
+export type Severity = "Info" | "Warn" | "Urgent";
+
+export interface BrokerNotification {
+  id: number;
+  type: BrokerNotificationType;
+  severity: Severity;
+  chatSessionId: number | null;
+  leadId: number | null;
+  customerPhone: string | null;
+  title: string;
+  body: string | null;
+  createdAt: string;
+  readAt: string | null;
+  dismissedAt: string | null;
+}
+
+export interface NotificationsPayload {
+  unreadCount: number;
+  items: BrokerNotification[];
+}
+
+/* ─── T6 — Per-turn debug log entries (used by chat drawer) ───── */
+
+export interface ChatTurnLogRow {
+  turnIndex: number;
+  userMessage: string;
+  assistantReply: string;
+  routeTaken: string | null;
+  retrievedListingIds: number[] | null;
+  retrievedKnowledgeIds: number[] | null;
+  hallucinationRiskFlags: string[] | null;
+  latencyMs: number;
+  modelUsed: string;
+  addressedByName: boolean;
+  inputModality: string;
+  createdAt: string;
+}
+
+export interface SessionTranscript {
+  id: number;
+  platform: string;
+  userId: string;
+  isBrokerHandling: boolean;
+  brokerTookOverAt: string | null;
+  turnCount: number;
+  turns: ChatTurnLogRow[];
+}
+
+/* ─── T2 — MarketKnowledge CRUD ───────────────────────────────── */
+
+export type KnowledgeTopic =
+  | "Mortgage" | "Tax" | "Documentation" | "PaymentPlan"
+  | "Compound" | "NorthCoast" | "ForeignOwnership"
+  | "Brokerage" | "Pricing" | "Process" | "Other";
+
+export interface MarketKnowledgeEntry {
+  id: number;
+  tenantId: number | null;
+  topic: KnowledgeTopic | string;
+  question: string;
+  answer: string;
+  aliases: string[] | null;
+  region: string | null;
+  confidence: number;
+  sourceUrl: string | null;
+  lastVerifiedAt: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string | null;
+  isGlobal: boolean;
+}
+
+export interface MarketKnowledgePage {
+  total: number;
+  page: number;
+  pageSize: number;
+  items: MarketKnowledgeEntry[];
+}
+
+export interface MarketKnowledgeUpsert {
+  id?: number;
+  tenantId?: number | null;
+  topic?: string;
+  question: string;
+  answer: string;
+  aliases?: string[];
+  region?: string | null;
+  confidence?: number;
+  sourceUrl?: string | null;
+  lastVerifiedAt?: string | null;
+  isActive?: boolean;
 }
